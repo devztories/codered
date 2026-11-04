@@ -6,17 +6,37 @@
   const body = document.getElementById('chatBody');
   const input = document.getElementById('chatMessage');
 
-  // Keep the brand and navigation visible while scrolling on every screen size.
+  // Keep the navbar/header visible. Only collapse an expanded navigation menu
+  // when the page itself scrolls, regardless of scroll direction.
   const navbar = document.getElementById('mainNavbar');
-  navbar?.classList.remove('navbar-scroll-hidden');
+  const navCollapse = document.getElementById('nav');
+  let previousPageScrollY = Math.max(0, window.scrollY || 0);
 
-  // A dropdown toggle must stay open inside the mobile menu so both project
-  // destinations remain reachable. Close the menu only after a real item is chosen.
-  document.querySelectorAll('#nav .dropdown-toggle').forEach(toggle => {
-    toggle.addEventListener('click', event => {
-      if (window.matchMedia('(max-width: 991.98px)').matches) event.preventDefault();
+  window.addEventListener('scroll', () => {
+    const currentPageScrollY = Math.max(0, window.scrollY || 0);
+    const pageMoved = Math.abs(currentPageScrollY - previousPageScrollY) > 1;
+    previousPageScrollY = currentPageScrollY;
+
+    if (!pageMoved) return;
+
+    // Mobile expanded menu: close it on either upward or downward page scroll.
+    if (navCollapse?.classList.contains('show') && window.bootstrap) {
+      window.bootstrap.Collapse.getOrCreateInstance(navCollapse).hide();
+    }
+
+    // Desktop Projects dropdown: close it on page scroll too.
+    document.querySelectorAll('#mainNavbar .dropdown-toggle').forEach(toggle => {
+      const dropdown = window.bootstrap?.Dropdown.getInstance(toggle);
+      dropdown?.hide();
     });
+  }, { passive: true });
+
+  navCollapse?.addEventListener('shown.bs.collapse', () => {
+    previousPageScrollY = Math.max(0, window.scrollY || 0);
   });
+
+  // Bootstrap expands the Projects dropdown; choosing a dropdown item navigates
+  // to its own destination and the mobile menu is collapsed by the handler below.
   document.querySelectorAll('#nav .dropdown-item, #nav > .navbar-nav > li:not(.dropdown) .nav-link, #nav .btn').forEach(link => {
     link.addEventListener('click', () => {
       const collapse = document.getElementById('nav');
@@ -49,6 +69,12 @@
   }
   launch?.addEventListener('click', openChat);
   close?.addEventListener('click', closeChat);
+
+  // Prevent Send from stealing focus from the composer on touch devices.
+  // This keeps the mobile keyboard open for the next message.
+  const chatSendButton = form?.querySelector('button[type="submit"]');
+  chatSendButton?.addEventListener('pointerdown', event => event.preventDefault());
+  chatSendButton?.addEventListener('mousedown', event => event.preventDefault());
 
   // Keep the current section selected in red, including after page navigation.
   const path = window.location.pathname;
@@ -127,9 +153,21 @@
     } finally {
       if (sendButton) sendButton.disabled = false;
       body.scrollTop = body.scrollHeight;
-      if (window.matchMedia('(max-width: 700px)').matches) input?.focus();
+      // Keep the existing input focus; avoid blur/refocus that collapses the mobile keyboard.
     }
   });
+
+  // Horizontal project rail: touch-swipe on phones and arrow controls on desktop.
+  document.querySelectorAll('.project-row-wrap').forEach(wrapper => {
+    const rail = wrapper.querySelector('[data-project-row]');
+    wrapper.querySelector('.project-row-prev')?.addEventListener('click', () => {
+      rail?.scrollBy({ left: -Math.max(rail.clientWidth * 0.8, 220), behavior: 'smooth' });
+    });
+    wrapper.querySelector('.project-row-next')?.addEventListener('click', () => {
+      rail?.scrollBy({ left: Math.max(rail.clientWidth * 0.8, 220), behavior: 'smooth' });
+    });
+  });
+
 
 })();
 

@@ -41,8 +41,13 @@
 
   {% if page_obj.object_list %}
     <div class="project-catalogue" id="projectCatalogue">
-      <div class="project-catalogue-topline"><span>{{ project_count }} projects</span><span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></div>
-      <div class="project-catalogue-grid">
+      <div class="project-catalogue-topline">
+        <span>{{ project_count }} projects · 10 per page</span>
+        <span><i class="fa-solid fa-arrows-left-right"></i> Swipe left / right to browse</span>
+      </div>
+      <div class="project-row-wrap">
+        <button class="project-row-arrow project-row-prev" type="button" aria-label="Scroll projects left"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="project-catalogue-grid" data-project-row tabindex="0" aria-label="Swipe horizontally to browse projects">
         {% for p in page_obj %}
           <a class="project-card" href="{% url 'catalog:detail' p.slug %}">
             {% if p.cover_image %}<img src="{{ p.cover_image.url }}" alt="{{ p.name }}" loading="lazy">{% else %}<div class="project-placeholder"><i class="fa-solid fa-laptop-code"></i></div>{% endif %}
@@ -54,6 +59,8 @@
             </div>
           </a>
         {% endfor %}
+        </div>
+        <button class="project-row-arrow project-row-next" type="button" aria-label="Scroll projects right"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
       {% if page_obj.paginator.num_pages > 1 %}
         <nav class="project-pagination" aria-label="Project pages">

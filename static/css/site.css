@@ -487,3 +487,178 @@ main { animation:coderedPageEnter .24s ease-out both; }
   .project-filter { grid-template-columns:minmax(150px,.8fr) minmax(220px,1.5fr) minmax(160px,1fr) minmax(150px,1fr); }
   .project-filter-submit { width:100%; min-width:0; justify-content:center; }
 }
+
+
+/* Project catalogue: one horizontal row of up to ten cards per page.
+   Swipe left/right on touch screens; use the arrows on desktop. */
+.project-row-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.project-catalogue-grid[data-project-row] {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 3px 2px 16px;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  scrollbar-width: thin;
+}
+.project-catalogue-grid[data-project-row] > .project-card {
+  flex: 0 0 clamp(230px, 25vw, 285px);
+  width: clamp(230px, 25vw, 285px);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+.project-row-arrow {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #5a2529;
+  border-radius: 50%;
+  background: #171010;
+  color: #fff;
+  transition: background-color .2s ease, border-color .2s ease, transform .2s ease;
+}
+.project-row-arrow:hover {
+  background: #ed1c24;
+  border-color: #ed1c24;
+  transform: scale(1.05);
+}
+.project-row-arrow:focus-visible,
+.project-catalogue-grid[data-project-row]:focus-visible {
+  outline: 2px solid #ed1c24;
+  outline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .project-row-wrap { gap: 6px; }
+  .project-row-arrow { flex-basis: 34px; width: 34px; height: 34px; }
+  .project-catalogue-grid[data-project-row] { gap: 12px; }
+  .project-catalogue-grid[data-project-row] > .project-card {
+    flex-basis: min(78vw, 310px);
+    width: min(78vw, 310px);
+  }
+}
+
+
+/* Projects is a button dropdown, styled exactly like the other navbar links. */
+#mainNavbar .nav-item > .nav-link.dropdown-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+}
+#mainNavbar .nav-item > .nav-link.dropdown-toggle::after {
+  vertical-align: .18em;
+}
+#mainNavbar .nav-item > .nav-link.dropdown-toggle:focus-visible {
+  outline: 2px solid #ed1c24;
+  outline-offset: 3px;
+}
+
+
+/* Consistent red CTA treatment for the home-page section actions. */
+#about a.btn-red,
+#services a.btn-red,
+#reviews a.btn-red {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: .7rem 1.25rem;
+  border-radius: 10px;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* Align the About section with the other sections on narrow phone screens.
+   Bootstrap row gutters were making this section's content sit too far left. */
+@media (max-width: 767.98px) {
+  #about > .row {
+    margin-left: 0;
+    margin-right: 0;
+    --bs-gutter-x: 0;
+  }
+  #about > .row > [class*="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+  }
+  #about .section-copy,
+  #about h2,
+  #about .section-label {
+    max-width: 100%;
+  }
+}
+
+/* Dashboard shortcut cards behave like large, accessible buttons. */
+.dashboard-shortcut-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 16px;
+  outline-offset: 4px;
+}
+.dashboard-shortcut-link:hover,
+.dashboard-shortcut-link:focus {
+  color: inherit;
+}
+.dashboard-shortcut {
+  min-height: 150px;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+}
+.dashboard-shortcut h2 {
+  margin: 7px 0 8px;
+}
+.dashboard-shortcut span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: .84rem;
+  font-weight: 700;
+}
+.dashboard-shortcut span i {
+  color: #ed1c24;
+  font-size: .8rem;
+  margin: 0;
+}
+.dashboard-shortcut-link:hover .dashboard-shortcut,
+.dashboard-shortcut-link:focus-visible .dashboard-shortcut {
+  border-color: #ed1c24;
+  box-shadow: 0 10px 28px #ed1c241c;
+  transform: translateY(-3px);
+}
+.dashboard-order-details {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 150px;
+  min-height: 38px;
+  text-align: center;
+  white-space: nowrap;
+}
+@media (max-width: 575.98px) {
+  .dashboard-shortcut { min-height: 130px; padding: 14px !important; }
+  .dashboard-order-details { min-width: 0; margin-inline: auto; }
+}

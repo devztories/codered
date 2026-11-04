@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard | CODERED INVENTIONS{% endblock %}
+{% block content %}
+<section class="page-hero customer-dashboard"><div class="container">
+  <div class="section-label">CUSTOMER PORTAL</div><h1>My <span>Dashboard</span></h1>
+  <p class="text-secondary">Your projects, payments and certificates in one place.</p>
+  <div class="row g-3 my-4">
+    <div class="col-6 col-lg-4"><div class="tile h-100"><div class="small text-secondary">ORDERS</div><h2>{{ orders.count }}</h2></div></div>
+    <div class="col-6 col-lg-4"><div class="tile h-100"><div class="small text-secondary">PAYMENTS</div><h2>{{ payments.count }}</h2></div></div>
+    <div class="col-12 col-lg-4"><div class="tile h-100"><div class="small text-secondary">CERTIFICATES</div><h2>{{ certificates.count }}</h2></div></div>
+  </div>
+  <div class="d-flex flex-wrap gap-2 mb-4"><a class="btn btn-red" href="/orders/new/">Start a project</a><a class="btn btn-outline-light" href="/accounts/profile/">Edit profile</a></div>
+  <div class="dashboard-section"><div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><h3>My Orders</h3><span class="small text-secondary">Select an order to view its full details</span></div>
+  {% for o in orders %}
+    <article class="tile dashboard-record mb-3">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div class="flex-grow-1"><div class="small text-secondary">{{ o.order_id }} · {{ o.created_at|date:"d M Y" }}</div><h4 class="mt-1 mb-1">{{ o.title }}</h4>
+          {% if o.project %}<div class="small text-secondary">Catalogue project: {{ o.project.name }}</div>{% endif %}
+          <div class="d-flex flex-wrap gap-2 mt-2"><span class="status-chip">{{ o.get_status_display }}</span><span class="status-chip">Stage: {{ o.get_stage_display }}</span><span class="status-chip">₹{{ o.amount }}</span></div>
+        </div><a class="btn btn-outline-light btn-sm" href="{% url 'orders:detail' o.order_id %}">View order details</a>
+      </div>
+      {% if o.request %}<div class="record-subpanel mt-3"><b>Requested project details</b><div class="row g-2 mt-1"><div class="col-md-6"><small>Request type</small><div>{{ o.request.get_request_type_display }}</div></div><div class="col-md-6"><small>Category</small><div>{{ o.request.category|default:"Not specified" }}</div></div><div class="col-md-6"><small>Budget</small><div>{% if o.request.budget %}₹{{ o.request.budget }}{% else %}Not specified{% endif %}</div></div><div class="col-md-6"><small>Deadline</small><div>{{ o.request.deadline|default:"Not specified" }}</div></div><div class="col-12"><small>Required features</small><div>{{ o.request.required_features|default:o.request.customization_features|linebreaksbr }}</div></div>{% if o.request.academic_team_type == 'group' %}<div class="col-12"><small>Group members ({{ o.request.group_size }})</small><div>{{ o.request.group_member_names|linebreaksbr }}</div></div>{% endif %}</div></div>{% endif %}
+      {% include 'orders/_tracker.html' with order=o %}
+    </article>
+  {% empty %}<div class="tile">You have not placed any orders yet.</div>{% endfor %}
+  </div>
+  <div class="dashboard-section mt-5"><h3>Payment Records</h3>
+    {% for payment in payments %}<div class="tile dashboard-record mb-2"><div class="d-flex justify-content-between align-items-start flex-wrap gap-3"><div class="flex-grow-1 min-w-0"><b>{{ payment.order.title }}</b><div class="small text-secondary">{{ payment.order.order_id }} · {{ payment.created_at|date:"d M Y, h:i A" }}</div><div class="mt-1">Amount: ₹{{ payment.amount }} · Method: UPI</div>{% if payment.transaction_id %}<div class="small">UTR: {{ payment.transaction_id }}</div>{% endif %}{% if payment.receipt %}<a class="small" href="{{ payment.receipt.url }}" target="_blank" rel="noopener">View submitted screenshot</a>{% endif %}</div><span class="payment-status payment-status-{{ payment.status }} align-self-start flex-shrink-0">{% if payment.status == 'verified' %}<span class="payment-status-icon" aria-hidden="true">✓</span><span>Verified</span>{% elif payment.status == 'submitted' %}<span>Under review</span>{% elif payment.status == 'failed' %}<span>Failed</span>{% else %}<span>{{ payment.get_status_display }}</span>{% endif %}</span></div><a class="btn btn-sm btn-outline-light mt-2" href="{% url 'orders:detail' payment.order.order_id %}">Open related order</a></div>
+    {% empty %}<div class="tile">No payment records yet.</div>{% endfor %}
+  </div>
+  <div class="dashboard-section mt-5"><h3>Certificates</h3>
+    {% for c in certificates %}
+      <div class="tile dashboard-record mb-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+          <div class="certificate-preview-trigger" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#certificatePreview{{ c.pk }}" aria-label="Preview certificate for {{ c.recipient_name }}">
+            <img class="certificate-preview-image" src="{% url 'certificates:preview' c.certificate_id %}" alt="Certificate preview for {{ c.recipient_name }}">
+            <div class="small text-secondary text-center mt-2"><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge preview</div>
+          </div>
+          <div class="flex-grow-1">
+            <b>{{ c.project_name }}</b>
+            <div class="small text-secondary">{{ c.recipient_name }} · {{ c.certificate_id }} · {{ c.completion_date|date:"d M Y" }}</div>
+            {% if not c.revoked %}<a class="btn btn-red btn-sm mt-3" href="{% url 'certificates:download' c.certificate_id %}">Download certificate</a>{% else %}<span class="status-chip mt-2">Revoked</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="modal fade certificate-preview-modal" id="certificatePreview{{ c.pk }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl"><div class="modal-content bg-dark border-secondary">
+          <div class="modal-header border-secondary"><h5 class="modal-title text-white">Certificate Preview</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body p-3 p-md-4 text-center"><img class="certificate-preview-image certificate-preview-image-large" src="{% url 'certificates:preview' c.certificate_id %}" alt="Full certificate preview for {{ c.recipient_name }}"></div>
+          <div class="modal-footer border-secondary">{% if not c.revoked %}<a class="btn btn-red" href="{% url 'certificates:download' c.certificate_id %}">Download certificate PDF</a>{% endif %}<button class="btn btn-outline-light" data-bs-dismiss="modal">Close</button></div>
+        </div></div>
+      </div>
+    {% empty %}<div class="tile">Certificates appear here after your project is completed and payment is verified.</div>{% endfor %}
+  </div>
+  <div class="dashboard-section mt-5"><h3>Notifications</h3>{% for n in notifications %}<div class="tile mb-2">{{ n.title }} — {{ n.message }}</div>{% empty %}<div class="tile">No new notifications.</div>{% endfor %}</div>
+</div></section>
+<style>
+.customer-dashboard .tile{border:1px solid #343434;border-radius:16px;padding:20px;background:#151515;color:#f6f6f6}
+.dashboard-section{margin-top:28px}.dashboard-record{padding:18px}.record-subpanel{background:#101010;border:1px solid #303030;border-radius:12px;padding:15px}.record-subpanel small{color:#999}.status-chip{display:inline-block;border:1px solid #b3262d;color:#ff777d;border-radius:30px;padding:4px 10px;font-size:12px}.dashboard-record .project-tracker{margin-top:20px}
+@media(max-width:576px){.customer-dashboard .tile{padding:14px}.dashboard-record{padding:14px}.dashboard-record h4{font-size:17px}}
+.payment-status{display:inline-flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:7px;width:max-content!important;min-width:0!important;max-width:max-content!important;height:34px!important;min-height:34px!important;max-height:34px!important;aspect-ratio:auto!important;flex:0 0 auto!important;align-self:flex-start;margin-top:2px;border-radius:999px;padding:0 12px!important;font-size:12px;line-height:1!important;font-weight:700;border:1px solid #666;color:#ddd;background:#252525;white-space:nowrap;box-sizing:border-box}
+.payment-status-verified{color:#7ee2a8;background:#103522;border-color:#23834e}
+.payment-status-icon{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 18px!important;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;border-radius:50%;background:#1fbd69;color:#062b18!important;font-size:13px!important;font-weight:900;line-height:1!important;padding:0!important;margin:0!important}
+.payment-status-submitted{color:#ffd77a;background:#3a2c0b;border-color:#9a741b}
+.payment-status-pending{color:#ddd;background:#292929;border-color:#666}
+.payment-status-failed{color:#ff9999;background:#3b1717;border-color:#9c3434}
+.certificate-preview-trigger{width:min(100%,290px);cursor:zoom-in}.certificate-preview-image{display:block;width:100%;height:auto;border:1px solid #c49a32;box-shadow:0 8px 28px #0008}.certificate-preview-image-large{width:auto;max-width:100%;max-height:78vh;margin:auto;object-fit:contain}
+.certificate-mini,.certificate-large{position:relative;overflow:hidden;text-align:center;color:#181818;background:#faf9f5;border:5px double #c49a32;box-shadow:0 8px 28px #0008}
+.certificate-mini{aspect-ratio:1/1.414;padding:13px 10px;border-width:3px}
+.certificate-mini:before,.certificate-large:before{content:"";position:absolute;inset:8px;border:1px solid #b82029;pointer-events:none}
+.certificate-mini-brand{font-size:12px;font-weight:900;letter-spacing:1px;margin-top:14px}.certificate-mini-brand span{color:#c51d29}
+.certificate-mini-rule{height:3px;background:#c51d29;margin:8px 4px 17px}
+.certificate-mini-title{font-family:Georgia,serif;color:#b58a24;font-size:23px;font-weight:bold}
+.certificate-mini-subtitle{font-size:9px;font-weight:bold;letter-spacing:1px}
+.certificate-mini-recipient{font-family:Georgia,serif;font-style:italic;color:#c51d29;font-size:19px;margin:18px 0 8px}
+.certificate-mini-copy{font-size:8px}.certificate-mini-project{font-weight:bold;font-size:11px;margin:8px 0}
+.certificate-mini-footer{position:absolute;bottom:18px;left:8px;right:8px;font-size:7px}
+.certificate-large{width:100%;max-width:760px;aspect-ratio:0.707;margin:auto;padding:7% 8%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.certificate-large:after{content:"";position:absolute;inset:16px;border:2px solid #c49a32;pointer-events:none}
+.certificate-large-brand{font-size:clamp(17px,3vw,30px);font-weight:900;margin-top:6%}.certificate-large-brand b{color:#c51d29}
+.certificate-large-tag{font-size:clamp(7px,1vw,10px);letter-spacing:2px;margin-top:5px}
+.certificate-large-heading{font-family:Georgia,serif;color:#b58a24;font-size:clamp(25px,5vw,48px);font-weight:bold;margin-top:13%}
+.certificate-large-subheading{font-size:clamp(10px,1.8vw,16px);font-weight:bold;letter-spacing:2px}
+.certificate-large-intro{font-size:clamp(8px,1.3vw,12px);margin-top:9%}
+.certificate-large-name{font-family:Georgia,serif;font-style:italic;color:#c51d29;font-size:clamp(22px,4vw,40px);margin:12px 0;border-bottom:1px solid #c49a32;padding:0 12px 8px;max-width:100%;overflow-wrap:anywhere}
+.certificate-large-copy{font-size:clamp(9px,1.4vw,13px);margin-top:8px}
+.certificate-large-project{font-size:clamp(13px,2vw,20px);font-weight:bold;margin-top:12px;max-width:90%;overflow-wrap:anywhere}
+.certificate-large-seal{margin-top:10%;width:65px;height:65px;border-radius:50%;background:#c49a32;color:#171717;border:6px double #171717;display:grid;place-items:center;font-size:30px}
+.certificate-large-meta,.certificate-large-id{position:absolute;bottom:12%;font-size:clamp(7px,1vw,10px);text-align:center}.certificate-large-meta{left:10%}.certificate-large-id{right:10%}
+.certificate-large-bottom{position:absolute;bottom:5%;font-size:clamp(6px,.9vw,9px)}
+@media(max-width:575px){.certificate-preview-trigger{width:100%;max-width:230px}.certificate-large{padding:6% 5%}.certificate-large-seal{width:44px;height:44px;font-size:20px}}
+
+</style>
+{% endblock %}

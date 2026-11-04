@@ -1,0 +1,10 @@
+<div class="project-tracker" aria-label="Project progress: {{ order.get_stage_display }}">
+  <div class="tracker-heading"><div><span class="tracker-kicker">LIVE PROJECT TRACKING</span><h4>Project journey</h4></div><span class="tracker-current">{{ order.get_stage_display }}</span></div>
+  <div class="tracker-track" style="--track-progress: {% if order.stage == 'discussed' %}0{% elif order.stage == 'started' %}33.333{% elif order.stage == 'completed' %}66.666{% else %}100{% endif %}%">
+    <div class="tracker-line"><span></span></div>
+    <div class="tracker-step {% if order.stage == 'discussed' or order.stage == 'started' or order.stage == 'completed' or order.stage == 'delivered' %}is-done{% endif %} {% if order.stage == 'discussed' %}is-current{% endif %}"><span class="tracker-node">{% if order.stage == 'discussed' or order.stage == 'started' or order.stage == 'completed' or order.stage == 'delivered' %}✓{% else %}1{% endif %}</span><b>Project Discussed</b><small>Requirements & planning</small></div>
+    <div class="tracker-step {% if order.stage == 'started' or order.stage == 'completed' or order.stage == 'delivered' %}is-done{% endif %} {% if order.stage == 'started' %}is-current{% endif %}"><span class="tracker-node">{% if order.stage == 'started' or order.stage == 'completed' or order.stage == 'delivered' %}✓{% else %}2{% endif %}</span><b>Project Started</b><small>Development in progress</small></div>
+    <div class="tracker-step {% if order.stage == 'completed' or order.stage == 'delivered' %}is-done{% endif %} {% if order.stage == 'completed' %}is-current{% endif %}"><span class="tracker-node">{% if order.stage == 'completed' or order.stage == 'delivered' %}✓{% else %}3{% endif %}</span><b>Completed</b><small>Final checks done</small></div>
+    <div class="tracker-step {% if order.stage == 'delivered' %}is-done is-current{% endif %}"><span class="tracker-node">{% if order.stage == 'delivered' %}✓{% else %}4{% endif %}</span><b>Delivered</b><small>Ready for you</small></div>
+  </div>
+</div>

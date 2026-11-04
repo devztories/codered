@@ -1,0 +1,19 @@
+CodeRed Invention - Certificate Template Update
+Date: 03 November 2026
+
+Changes:
+- Replaced the certificate artwork used by the certificate renderer with the new CodeRed C-logo black/red blank A4 design.
+- Added certificates/assets/certificate_template.png.
+- Updated certificates/views.py to render recipient, project, completion date, certificate ID, company ID, QR verification, mentor/company details, and footer details over the new artwork.
+- PDF downloads now use an A4 portrait page size.
+- Existing certificate eligibility, payment verification, generation, preview, and verification routes remain unchanged.
+- Existing certificate_reference.png is retained as a backup asset; it is no longer used by the renderer.
+
+Validation:
+- All Python source files compiled successfully with py_compile.
+- Certificate image renderer was exercised with sample values and generated a preview image.
+- ReportLab A4 PDF page-size export was exercised.
+- Full Django manage.py checks were not run in this environment because Django is not installed in the execution environment. Run `python manage.py check` and `python manage.py migrate` in the project's configured virtual environment before deployment.
+
+Additional update:
+- Enter key now moves focus to the next visible field in multi-field forms; it submits only from the final field. Textareas retain normal newline behavior. Single-field forms continue to submit on Enter.

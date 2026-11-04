@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}{{ title|default:'Account' }} | CODERED INVENTIONS{% endblock %}
+{% block content %}
+<section class="account-section">
+  <div class="account-wrap">
+    <div class="account-intro">
+      <span class="section-label">CODERED INVENTIONS</span>
+      <h1>{{ title|default:'Continue' }}</h1>
+      <p>Simple, secure access to your projects and account.</p>
+    </div>
+    <form method="post" enctype="multipart/form-data" class="account-card" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <div class="field-group">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<div class="field-error">{{ field.errors|striptags }}</div>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="btn btn-red account-submit" type="submit">{% if request.resolver_match.url_name == 'login' %}Login{% elif request.resolver_match.url_name == 'register' %}Create account{% else %}Save changes{% endif %}</button>
+      {% if request.resolver_match.url_name == 'login' %}
+        <div class="account-links"><a href="/accounts/password-reset/">Forgot password?</a><span>New here? <a href="/accounts/register/">Create an account</a></span></div>
+      {% elif request.resolver_match.url_name == 'register' %}
+        <div class="account-links centered">Already have an account? <a href="/accounts/login/">Login</a></div>
+      {% endif %}
+    </form>
+  </div>
+</section>
+{% endblock %}

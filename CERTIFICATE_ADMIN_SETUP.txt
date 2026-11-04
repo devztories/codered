@@ -1,0 +1,26 @@
+CODERED INVENTIONS - ADMIN-MANAGED CERTIFICATES
+
+What changed
+- Kept the supplied certificate artwork as the fixed visual background.
+- Added Certificate design settings in Django Admin for editable headings, ribbon text,
+  intro/completion/body copy, company ID, certificate ID prefix, date/verification labels,
+  mentor/signature text, company name, website and location.
+- Certificate records remain editable in Admin for recipient name, project title and
+  completion date. Certificate ID is generated from the admin-configured prefix.
+- Preview and PDF download use the same renderer and create a per-certificate QR code.
+
+Deployment steps
+1. Back up your Supabase database before applying migrations.
+2. Deploy the project code.
+3. Run: python manage.py migrate
+4. Open Django Admin -> Certificates -> Certificate design settings.
+5. Save the settings. Edit individual certificate records under Certificates as needed.
+
+Important
+- This adds migration certificates.0002_certificatedesignsettings.
+- Existing Certificate records are retained; no data deletion or flush is performed.
+- The visual background artwork itself remains fixed. Admin-editable text is drawn over
+  the text zones; logo, border, laurels, medal and decorative design remain from artwork.
+- QR links use the request host and resolve to the certificate verification URL.
+- Run a test certificate preview and PDF after deployment to verify font/layout in the
+  target environment.

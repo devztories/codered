@@ -1,0 +1,31 @@
+CODERED INVENTIONS update
+
+1. UPI proof submission accepts either:
+   - payment screenshot only, OR
+   - UTR / transaction reference number only.
+   Both may also be submitted. At least one is required. Submission remains pending until staff verifies it; it never auto-marks payment as paid.
+
+2. Customer dashboard has responsive sections for Orders, Payment Records and Certificates.
+   Each order shows the actual project/order title and links to its order details.
+   Payment records show amount, status, UTR and uploaded screenshot when present.
+   Certificates show recipient, project, certificate ID and download link.
+
+3. Contact form uses the same branded aligned form classes as the project request form.
+   WhatsApp and phone links use Contact > Site Settings values (phone, whatsapp number, email).
+   Configure the WhatsApp number in international digits format without + or spaces, e.g. 919876543210.
+   A floating WhatsApp action is shown when a WhatsApp number is configured.
+
+4. Chatbot contact queries return configured phone, WhatsApp and email details from Site Settings.
+   The existing English-only chatbot policy is retained.
+
+5. Certificate PDF uses a branded portrait design with CodeRed title, red/gold frame, recipient name,
+   project title, completion date, seal, certificate ID and QR verification URL.
+   Certificate generation is still gated by BOTH verified payment and Completed/Delivered project stage.
+
+After replacing files, back up db.sqlite3 and media first. No new database fields were added in this update,
+so no migration is expected. Run:
+  python manage.py check
+  python manage.py runserver
+
+For WhatsApp / contact details, sign in to admin and configure Contact Site Settings.
+Payment screenshot / UTR submissions must be manually verified by authorized staff.

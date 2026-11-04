@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}{{ project.name }} | CODERED INVENTIONS{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container project-detail-shell">
+  {% if project.cover_image %}<img class="detail-image" src="{{ project.cover_image.url }}" alt="{{ project.name }}">{% endif %}
+  <div class="project-meta mb-3"><span class="section-label mb-0">{{ project.get_project_type_display }} · {{ project.category.name }}</span><span class="project-status {% if project.is_published %}status-published{% else %}status-progress{% endif %}">{% if project.is_published %}Available{% else %}In development · Preview{% endif %}</span></div>
+  <h1>{{ project.name }}</h1><p class="project-detail-description">{{ project.description|linebreaksbr }}</p>
+  {% if project.technologies %}<p><b>Technologies:</b> {{ project.technologies }}</p>{% endif %}{% if project.features %}<p><b>Included features:</b> {{ project.features|linebreaksbr }}</p>{% endif %}
+  {% if project.project_type == 'academic' and project.is_ready_made %}<div class="ready-made-price"><span>Ready-made project price</span><strong>₹{{ project.price|floatformat:2 }}</strong><small>One-time listed price. Any separately agreed customization may cost extra.</small></div>{% elif project.price %}<div class="ready-made-price"><span>Starting budget</span><strong>₹{{ project.price|floatformat:2 }}</strong></div>{% endif %}
+  {% if not project.is_published %}<p class="draft-notice">This project is still being developed. The details may change before its official release.</p>{% endif %}
+  <div class="d-flex flex-wrap gap-2 mt-4">
+    {% if project.demo_url and project.is_published %}<a class="btn btn-outline-light" href="{{ project.demo_url }}" target="_blank" rel="noopener">Live demo</a>{% endif %}
+    {% if project.project_type == 'academic' and project.is_ready_made and project.is_published %}
+      {% if user.is_authenticated %}<form method="post" action="{% url 'orders:buy' project.slug %}">{% csrf_token %}<button class="btn btn-red" type="submit">Buy now · ₹{{ project.price|floatformat:0 }}</button></form>{% else %}<a class="btn btn-red" href="{% url 'accounts:login' %}?next={% url 'catalog:detail' project.slug %}">Login to buy · ₹{{ project.price|floatformat:0 }}</a>{% endif %}
+      {% if project.allow_feature_customization %}<a class="btn btn-outline-light" href="{% url 'orders:request' %}?project={{ project.pk }}">Add features / Customize</a>{% endif %}
+    {% else %}<a class="btn btn-red" href="{% url 'orders:request' %}?type={% if project.project_type == 'academic' %}academic_custom{% else %}business{% endif %}&project={{ project.pk }}">Request this project</a>{% endif %}
+    <a class="btn btn-outline-light" href="{% url 'catalog:projects' %}?type={{ project.project_type }}">Back to projects</a>
+  </div>
+</div></section>
+{% endblock %}

@@ -1,0 +1,17 @@
+Django==5.2.18
+dj-database-url==2.3.0
+psycopg[binary]
+python-dotenv
+whitenoise
+Pillow
+qrcode
+reportlab
+gunicorn
+django-crispy-forms
+crispy-bootstrap5
+django-widget-tweaks
+django-ckeditor
+django-cloudinary-storage
+cloudinary
+django-storages
+boto3

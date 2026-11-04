@@ -1,0 +1,23 @@
+CODERED INVENTIONS - Request, payment status and certificate update
+
+1. Catalogue project request
+- When a ready-made academic catalogue project is selected for customization, project title and category are populated from the catalogue.
+- These catalogue-owned details are read-only in the form and are enforced server-side on save.
+- The selected Project is linked to the created Order.
+- The user can still enter additional customization features, technologies, requirements, budget, deadline and optional reference file.
+
+2. Payment flow
+- After submitting a screenshot or UTR, the user is redirected to the order page and sees a 'Reviewing Your Payment' modal.
+- Payment records use compact, aligned status pills. Verified is shown with a green check; submitted is shown as Under review.
+- Admin verification remains manual.
+
+3. Certificate
+- The supplied certificate artwork is used as the background for both the PDF and dashboard preview.
+- Per-certificate recipient name, project title, completion date, unique Certificate ID and QR code are rendered onto the artwork.
+- Each QR code points to that certificate's verification URL.
+- Preview image and downloadable PDF use the same rendered image.
+- Reference artwork and bundled fonts are in certificates/assets/.
+
+Checks:
+- Python compileall completed successfully.
+- Full Django runtime checks and end-to-end browser/payment verification have not been performed.

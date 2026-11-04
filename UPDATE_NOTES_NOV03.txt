@@ -1,0 +1,21 @@
+CODERED INVENTIONS - Update notes
+
+Included:
+- Sequential IDs for new orders (CRI-ORD-000001, then incrementing) and certificates (CRI-CERT-000001, then incrementing). Existing IDs are retained.
+- Academic Build Your Own supports Single Person and Group. Group requests require the member count and exactly one full name per line. Each group member receives a separate certificate record with their own recipient name.
+- Certificate generation/download is blocked until the related order has a verified payment and the project stage is Completed or Delivered. An unpaid certificate action redirects to the UPI payment page.
+- The tracking page shows a Complete Your Payment prompt/modal before certificate access and warns that delivery cannot be released until payment is verified. The Order model also prevents changing a paid-required order to Delivered without a verified payment.
+- Admin Orders list includes a Full details view with customer, request, requirements, budget, deadline, payment receipts/status, updates, quotations and certificates in one page.
+- Chatbot instructions and fallback replies are English-only, conversational, and avoid sending the exact same response consecutively.
+- Removed the Scroll to Explore cue from the home page.
+- Added aligned form styles and a branded certificate form.
+- Added a left-edge swipe-back gesture for touchscreens. Windows precision-touchpad swipe-back is a browser/Windows gesture and remains native; websites cannot reliably capture that hardware gesture.
+
+IMPORTANT DATABASE UPDATE
+This project has model changes. Back up db.sqlite3 first, then run from the project folder:
+  python manage.py makemigrations orders certificates
+  python manage.py migrate
+  python manage.py check
+  python manage.py runserver
+
+Payment verification must be performed by an authorized admin. A submitted UPI screenshot is not considered a verified payment.

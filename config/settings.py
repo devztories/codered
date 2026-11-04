@@ -21,6 +21,37 @@ DEBUG = os.getenv(
     "False" if IS_VERCEL else "True"
 ).lower() == "true"
 
+# --------------------------------------------------
+# VERCEL TEMPLATE DIAGNOSTICS
+# --------------------------------------------------
+
+if IS_VERCEL:
+    print("========== VERCEL TEMPLATE DEBUG ==========")
+    print("BASE_DIR:", BASE_DIR)
+    print("CURRENT WORKING DIRECTORY:", Path.cwd())
+
+    print(
+        "ROOT TEMPLATE EXISTS:",
+        (BASE_DIR / "templates" / "public" / "home.html").exists()
+    )
+
+    print(
+        "SERVICES TEMPLATE EXISTS:",
+        (
+            BASE_DIR
+            / "services"
+            / "templates"
+            / "public"
+            / "home.html"
+        ).exists()
+    )
+
+    print("===========================================")
+
+# --------------------------------------------------
+# ALLOWED HOSTS
+# --------------------------------------------------
+
 ALLOWED_HOSTS = [
     x.strip()
     for x in os.getenv(
@@ -79,11 +110,14 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+
         "DIRS": [
-        BASE_DIR / "templates",
-        BASE_DIR / "services" / "templates",
+            BASE_DIR / "templates",
+            BASE_DIR / "services" / "templates",
         ],
+
         "APP_DIRS": True,
+
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
@@ -99,12 +133,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # --------------------------------------------------
 # DATABASE CONFIGURATION
-# Supabase PostgreSQL
+# SUPABASE POSTGRESQL
 # --------------------------------------------------
 
 DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
 if not DATABASE_URL and os.getenv("DB_HOST"):
+
     DB_NAME = os.getenv("DB_NAME", "postgres")
     DB_USER = os.getenv("DB_USER", "")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "")
@@ -119,6 +154,7 @@ if not DATABASE_URL and os.getenv("DB_HOST"):
     )
 
 if DATABASE_URL:
+
     import dj_database_url
 
     DATABASES = {
@@ -132,6 +168,7 @@ if DATABASE_URL:
     DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
 else:
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -207,6 +244,7 @@ SUPABASE_PUBLIC_URL = os.getenv(
 ).rstrip("/")
 
 if SUPABASE_S3_ENDPOINT:
+
     STORAGES = {
         "default": {
             "BACKEND": "supabase_storage.SupabasePublicStorage",
@@ -227,7 +265,9 @@ if SUPABASE_S3_ENDPOINT:
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_FILE_OVERWRITE = False
     AWS_LOCATION = "codered"
+
 else:
+
     STORAGES = {
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -236,6 +276,7 @@ else:
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
+
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
 
@@ -315,6 +356,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 if not DEBUG:
+
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

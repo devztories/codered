@@ -6,61 +6,18 @@
   const body = document.getElementById('chatBody');
   const input = document.getElementById('chatMessage');
 
-  // Mobile navbar: scrolling never reveals it automatically. Use the floating toggle.
+  // Keep the brand and navigation visible while scrolling on every screen size.
   const navbar = document.getElementById('mainNavbar');
-  let lastScrollY = window.scrollY;
-  let scrollTicking = false;
-  const navToggle = document.createElement('button');
-  navToggle.type = 'button';
-  navToggle.className = 'mobile-nav-reveal';
-  navToggle.setAttribute('aria-label', 'Show navigation menu');
-  navToggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
-  document.body.appendChild(navToggle);
+  navbar?.classList.remove('navbar-scroll-hidden');
 
-  function showNavToggle(show) {
-    navToggle.classList.toggle('is-visible', !!show);
-  }
-  navToggle.addEventListener('click', () => {
-    navbar?.classList.remove('navbar-scroll-hidden');
-    showNavToggle(false);
-    lastScrollY = window.scrollY;
+  // A dropdown toggle must stay open inside the mobile menu so both project
+  // destinations remain reachable. Close the menu only after a real item is chosen.
+  document.querySelectorAll('#nav .dropdown-toggle').forEach(toggle => {
+    toggle.addEventListener('click', event => {
+      if (window.matchMedia('(max-width: 991.98px)').matches) event.preventDefault();
+    });
   });
-
-  function updateNavbarOnScroll() {
-    if (!navbar) return;
-    const mobile = window.matchMedia('(max-width: 991.98px)').matches;
-    const currentY = window.scrollY;
-    if (!mobile || currentY < 24) {
-      navbar.classList.remove('navbar-scroll-hidden');
-      showNavToggle(false);
-    } else if (currentY > lastScrollY + 7) {
-      navbar.classList.add('navbar-scroll-hidden');
-      showNavToggle(true);
-      const collapse = document.getElementById('nav');
-      if (collapse && collapse.classList.contains('show') && window.bootstrap) {
-        window.bootstrap.Collapse.getOrCreateInstance(collapse).hide();
-      }
-    }
-    // Scrolling up intentionally does not reveal the navbar; the toggle must be tapped.
-    lastScrollY = currentY;
-    scrollTicking = false;
-  }
-
-  window.addEventListener('scroll', () => {
-    if (!scrollTicking) {
-      window.requestAnimationFrame(updateNavbarOnScroll);
-      scrollTicking = true;
-    }
-  }, { passive: true });
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 991) {
-      navbar?.classList.remove('navbar-scroll-hidden');
-      showNavToggle(false);
-    }
-  });
-
-  document.querySelectorAll('#nav .nav-link, #nav .dropdown-item, #nav .btn').forEach(link => {
+  document.querySelectorAll('#nav .dropdown-item, #nav > .navbar-nav > li:not(.dropdown) .nav-link, #nav .btn').forEach(link => {
     link.addEventListener('click', () => {
       const collapse = document.getElementById('nav');
       if (collapse?.classList.contains('show') && window.bootstrap) {
@@ -174,119 +131,6 @@
     }
   });
 
-  // Project catalogue: 10 projects per slide, swipe in either direction, infinite loop.
-  document.querySelectorAll('[data-project-carousel]').forEach(carousel => {
-    const track = carousel.querySelector('.project-carousel-track');
-    if (!track) return;
-    const originals = Array.from(track.children);
-    const count = originals.length;
-    if (!count) return;
-
-    const counter = carousel.querySelector('.project-carousel-count');
-    const previous = carousel.querySelector('[data-project-prev]');
-    const next = carousel.querySelector('[data-project-next]');
-
-    if (count === 1) {
-      track.style.transform = 'translate3d(0,0,0)';
-      if (counter) counter.textContent = '1 / 1';
-      return;
-    }
-
-    const firstClone = originals[0].cloneNode(true);
-    const lastClone = originals[count - 1].cloneNode(true);
-    [firstClone, lastClone].forEach(clone => {
-      clone.setAttribute('aria-hidden', 'true');
-      clone.querySelectorAll('a,button').forEach(item => item.setAttribute('tabindex', '-1'));
-    });
-    track.insertBefore(lastClone, originals[0]);
-    track.appendChild(firstClone);
-
-    let index = 1;
-    let startX = 0;
-    let startY = 0;
-    let isPointerDown = false;
-    let isAnimating = false;
-
-    function render(animate = true) {
-      const shouldAnimate = animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      track.style.transition = shouldAnimate ? 'transform .42s cubic-bezier(.22,.75,.25,1)' : 'none';
-      track.style.transform = `translate3d(${-index * 100}%,0,0)`;
-      if (counter) counter.textContent = `${((index - 1 + count) % count) + 1} / ${count}`;
-      isAnimating = shouldAnimate;
-    }
-    function goNext() {
-      if (isAnimating) return;
-      index += 1;
-      render();
-    }
-    function goPrevious() {
-      if (isAnimating) return;
-      index -= 1;
-      render();
-    }
-
-    track.addEventListener('transitionend', event => {
-      if (event.target !== track || event.propertyName !== 'transform') return;
-      isAnimating = false;
-      if (index === count + 1) {
-        index = 1;
-        render(false);
-      } else if (index === 0) {
-        index = count;
-        render(false);
-      }
-    });
-
-    previous?.addEventListener('click', goPrevious);
-    next?.addEventListener('click', goNext);
-
-    carousel.addEventListener('pointerdown', event => {
-      if (event.pointerType === 'mouse' && event.button !== 0) return;
-      startX = event.clientX;
-      startY = event.clientY;
-      isPointerDown = true;
-    }, { passive: true });
-
-    carousel.addEventListener('pointerup', event => {
-      if (!isPointerDown) return;
-      isPointerDown = false;
-      const dx = event.clientX - startX;
-      const dy = event.clientY - startY;
-      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-        if (dx < 0) goNext();
-        else goPrevious();
-      }
-    }, { passive: true });
-
-    carousel.addEventListener('pointercancel', () => { isPointerDown = false; });
-    render(false);
-  });
-
-  // The project-type select is the compact replacement for the old filter tabs.
-  const projectTypeSelect = document.getElementById('projectTypeSelect');
-  projectTypeSelect?.addEventListener('change', () => {
-    projectTypeSelect.form?.requestSubmit();
-  });
-})();
-
-// Windows touchscreen / touch-device edge swipe: swipe right from the left edge to go back.
-(function () {
-  let startX = 0, startY = 0, startedAtEdge = false;
-  document.addEventListener('touchstart', function (event) {
-    if (!event.touches || event.touches.length !== 1) return;
-    const touch = event.touches[0];
-    startX = touch.clientX;
-    startY = touch.clientY;
-    startedAtEdge = startX <= 28;
-  }, { passive: true });
-  document.addEventListener('touchend', function (event) {
-    if (!startedAtEdge || !event.changedTouches || event.changedTouches.length !== 1) return;
-    const touch = event.changedTouches[0];
-    const dx = touch.clientX - startX;
-    const dy = Math.abs(touch.clientY - startY);
-    if (dx > 110 && dy < 70 && window.history.length > 1) window.history.back();
-    startedAtEdge = false;
-  }, { passive: true });
 })();
 
 // Form keyboard flow: Enter moves to the next field; only the last field submits.
@@ -301,6 +145,7 @@
     if (event.key !== 'Enter' || event.defaultPrevented || event.isComposing) return;
     const field = event.target;
     if (!(field instanceof HTMLElement) || !field.matches(FIELD_SELECTOR)) return;
+    if (field.type === 'date' || field.type === 'datetime-local' || field.type === 'time') return;
     if (field.tagName === 'TEXTAREA' || field.isContentEditable) return;
     if (field.readOnly || field.getAttribute('aria-readonly') === 'true') return;
     const form = field.form;

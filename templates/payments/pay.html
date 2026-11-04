@@ -9,7 +9,7 @@
       <p class="fs-4">Amount to pay: <strong>₹{{ order.amount }}</strong></p>
       {% if payment_settings.instructions %}<p>{{ payment_settings.instructions|linebreaksbr }}</p>{% endif %}
       {% if payment_settings.qr_code %}
-        <div class="text-center my-4"><img class="qr" src="{{ payment_settings.qr_code.url }}" alt="CODERED INVENTIONS UPI payment QR code"><p class="mt-2">Scan this QR using any UPI app</p></div>
+        <div class="text-center my-4"><img class="qr" src="{{ payment_settings.qr_code.url }}" alt="CODERED INVENTIONS UPI payment QR code"><p class="mt-2">Scan this QR using any UPI app</p><a class="btn btn-outline-light btn-sm mt-2" href="{% url 'payments:download_qr' order.order_id %}"><i class="fa-solid fa-download me-2"></i>Download QR code</a></div>
       {% else %}
         <p class="alert alert-warning">Payment QR has not been configured yet. Please contact the administrator before paying.</p>
       {% endif %}

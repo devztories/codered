@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, render
+from django.core.paginator import Paginator
 from .models import Category, Project
 
 
@@ -25,16 +26,12 @@ def projects(request):
 
     qs = qs.order_by("price" if sort == "price" else "-created_at")
 
-    # Each swipeable carousel slide contains up to 10 projects.
-    project_list = list(qs)
-    project_batches = [
-        project_list[index:index + 10]
-        for index in range(0, len(project_list), 10)
-    ]
+    paginator = Paginator(qs, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     return render(request, "catalog/projects.html", {
-        "project_batches": project_batches,
-        "project_count": len(project_list),
+        "page_obj": page_obj,
+        "project_count": paginator.count,
         "categories": Category.objects.filter(is_active=True),
         "q": q,
         "selected": cat,

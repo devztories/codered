@@ -48,16 +48,18 @@
    if(!projectSelect)return;
    const item=projectData[projectSelect.value];
    if(item){
+     if(projectField)projectField.style.display='block';
      if(titleInput){titleInput.value=item.name;titleInput.readOnly=true;titleInput.classList.add('catalogue-filled');}
      if(categorySelect){categorySelect.value=item.category;categorySelect.disabled=false;categorySelect.classList.add('catalogue-filled');}
    }else{
+     if(projectField && typeSelect && typeSelect.value!=='ready_custom')projectField.style.display='none';
      if(titleInput){titleInput.readOnly=false;titleInput.classList.remove('catalogue-filled');}
      if(categorySelect){categorySelect.classList.remove('catalogue-filled');}
    }
  }
  const customizationField=document.querySelector('[data-field="customization_features"]');
  const requiredField=document.querySelector('[data-field="required_features"]');
- function sync(){const t=typeSelect?typeSelect.value:'business';cards.forEach(c=>c.classList.toggle('active',c.href.includes('type='+t)));if(projectField)projectField.style.display=t==='ready_custom'?'block':'none';if(customizationField){customizationField.style.display=t==='ready_custom'?'block':'none';}if(requiredField){requiredField.style.display=t==='ready_custom'?'none':'block';}if(teamSection)teamSection.style.display=t==='academic_custom'?'block':'none';syncTeam();}
+ function sync(){const t=typeSelect?typeSelect.value:'business';cards.forEach(c=>c.classList.toggle('active',c.href.includes('type='+t)));if(projectField)projectField.style.display=(t==='ready_custom'||(projectSelect&&projectSelect.value))?'block':'none';if(customizationField){customizationField.style.display=t==='ready_custom'?'block':'none';}if(requiredField){requiredField.style.display=t==='ready_custom'?'none':'block';}if(teamSection)teamSection.style.display=t==='academic_custom'?'block':'none';syncTeam();}
  function syncTeam(){const group=teamSelect&&teamSelect.value==='group';if(groupSize)groupSize.style.display=group?'block':'none';if(groupNames)groupNames.style.display=group?'block':'none';}
  cards.forEach(c=>c.addEventListener('click',function(e){if(typeSelect){e.preventDefault();const u=new URL(c.href);typeSelect.value=u.searchParams.get('type')||'business';sync();}}));if(typeSelect){typeSelect.addEventListener('change',sync);sync();}if(teamSelect){teamSelect.addEventListener('change',syncTeam);syncTeam();}if(projectSelect){projectSelect.addEventListener('change',fillProjectDetails);fillProjectDetails();}
 })();

@@ -39,7 +39,7 @@
           <div class="flex-grow-1">
             <b>{{ c.project_name }}</b>
             <div class="small text-secondary">{{ c.recipient_name }} · {{ c.certificate_id }} · {{ c.completion_date|date:"d M Y" }}</div>
-            {% if not c.revoked %}<a class="btn btn-red btn-sm mt-3" href="{% url 'certificates:download' c.certificate_id %}">Download certificate</a>{% else %}<span class="status-chip mt-2">Revoked</span>{% endif %}
+            {% if not c.revoked %}<a class="btn btn-red btn-sm mt-3" href="{% url 'certificates:download' c.certificate_id %}">Download certificate</a>{% if not c.order.review %}<a class="btn btn-outline-light btn-sm mt-3 ms-2" href="{% url 'reviews:create' c.order.order_id %}">Write a review</a>{% endif %}{% else %}<span class="status-chip mt-2">Revoked</span>{% endif %}
           </div>
         </div>
       </div>

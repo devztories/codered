@@ -16,7 +16,7 @@ class ProjectRequestForm(forms.ModelForm):
             "academic_team_type": "Academic project type",
             "group_size": "Number of group members",
             "group_member_names": "Full names of all group members (one per line)",
-            "project": "Select a ready-made project (optional)",
+            "project": "Selected catalogue project (optional)",
             "title": "Project name",
             "category": "Project category",
             "required_features": "Features you need",
@@ -28,7 +28,7 @@ class ProjectRequestForm(forms.ModelForm):
             "reference_file": "Reference file (optional)",
         }
         help_texts = {
-            "project": "Choose a ready-made academic project only when requesting customization.",
+            "project": "If you opened this form from a project card, that project is selected automatically.",
             "title": "Enter the name or working title of your project.",
             "required_features": "List the main modules and features you expect.",
             "customization_features": "For a ready-made project, mention only the extra features you want added.",
@@ -49,13 +49,13 @@ class ProjectRequestForm(forms.ModelForm):
             "technologies": forms.TextInput(attrs={"class": "form-control", "placeholder": "Python, Django, React..."}),
             "requirements": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Explain your idea and any special requirements..."}),
             "budget": forms.NumberInput(attrs={"class": "form-control", "placeholder": "Your approximate budget", "min": "0", "step": "0.01"}),
-            "deadline": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "deadline": forms.DateInput(attrs={"class": "form-control date-entry", "type": "date", "inputmode": "numeric", "autocomplete": "off", "placeholder": "YYYY-MM-DD"}),
             "reference_file": forms.ClearableFileInput(attrs={"class": "form-control"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["project"].queryset = Project.objects.filter(project_type="academic", is_ready_made=True).order_by("name")
+        self.fields["project"].queryset = Project.objects.all().select_related("category").order_by("name")
         for name in ("project", "category", "budget", "deadline", "reference_file", "customization_features", "technologies", "requirements", "required_features", "group_size", "group_member_names"):
             self.fields[name].required = False
 
@@ -63,8 +63,8 @@ class ProjectRequestForm(forms.ModelForm):
         cleaned = super().clean()
         request_type = cleaned.get("request_type")
         selected_project = cleaned.get("project")
-        if selected_project and request_type == "ready_custom":
-            # Catalogue details are authoritative; users only enter their additional requirements.
+        if selected_project:
+            # Catalogue details are authoritative whenever a catalogue card was selected.
             cleaned["title"] = selected_project.name
             cleaned["category"] = selected_project.category
         if request_type == "ready_custom":

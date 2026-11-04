@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import FileResponse, Http404
 from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
 
@@ -73,3 +74,18 @@ def _is_valid_image(uploaded_file):
     except (UnidentifiedImageError, OSError, ValueError):
         uploaded_file.seek(0)
         return False
+
+
+@login_required
+def download_qr(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    payment_settings = PaymentSettings.objects.first()
+    if not payment_settings or not payment_settings.qr_code:
+        raise Http404("Payment QR is not configured.")
+    try:
+        payment_settings.qr_code.open("rb")
+    except (OSError, ValueError):
+        raise Http404("Payment QR is unavailable.")
+    filename = "CODERED-UPI-QR"
+    suffix = (payment_settings.qr_code.name.rsplit(".", 1)[-1] or "png").lower()
+    return FileResponse(payment_settings.qr_code, as_attachment=True, filename=f"{filename}.{suffix}")

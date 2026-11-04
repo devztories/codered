@@ -13,12 +13,15 @@ def request_project(request):
     initial = {"request_type": request.GET.get("type", "business")}
     project_id = request.GET.get("project")
     if project_id and project_id.isdigit():
-        selected_project = Project.objects.filter(pk=project_id, project_type="academic", is_ready_made=True).first()
+        selected_project = Project.objects.select_related("category").filter(pk=project_id).first()
         if selected_project:
             initial["project"] = selected_project.pk
             initial["title"] = selected_project.name
             initial["category"] = selected_project.category_id
-            initial["request_type"] = "ready_custom"
+            if selected_project.project_type == "academic" and selected_project.is_ready_made:
+                initial["request_type"] = "ready_custom"
+            else:
+                initial["request_type"] = "academic_custom" if selected_project.project_type == "academic" else "business"
     form = ProjectRequestForm(request.POST or None, request.FILES or None, initial=initial if request.method == "GET" else None)
     if request.method == "POST" and form.is_valid():
         project_request = form.save(commit=False)
@@ -33,7 +36,7 @@ def request_project(request):
         return redirect("orders:detail", order_id=order.order_id)
     project_options = [
         {"id": item.pk, "name": item.name, "category": item.category_id or ""}
-        for item in Project.objects.filter(project_type="academic", is_ready_made=True).order_by("name")
+        for item in Project.objects.select_related("category").order_by("name")
     ]
     return render(request, "orders/request.html", {
         "form": form,

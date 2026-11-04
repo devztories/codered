@@ -10,7 +10,7 @@ from catalog.models import Project, Category, SubCategory
 from orders.models import ProjectRequest, Order, Quotation, OrderUpdate
 from payments.models import Payment, PaymentSettings
 from accounts.models import User, UserProfile
-from contact.models import ContactMessage
+from contact.models import ContactMessage, SiteSettings
 from reviews.models import Review
 from certificates.models import Certificate
 from services.models import Service
@@ -27,6 +27,7 @@ MODULES = {
  'payments': {'title':'Payments','subtitle':'Review UPI receipts and verify payments','model':Payment,'icon':'₹','exclude':('created_at','verified_at')},
  'payment-settings': {'title':'Payment Settings','subtitle':'UPI ID, display name and QR code','model':PaymentSettings,'icon':'◉','exclude':()},
  'users': {'title':'Users','subtitle':'Customer and administrator accounts','model':User,'icon':'♙','exclude':('password','last_login','groups','user_permissions','date_joined')},
+ 'site-settings': {'title':'Contact Settings','subtitle':'Manage WhatsApp, email and phone details shown on Contact Us','model':SiteSettings,'icon':'☎','exclude':('updated_at',)},
  'messages': {'title':'Enquiries','subtitle':'Customer contact messages','model':ContactMessage,'icon':'☏','exclude':('created_at',)},
  'reviews': {'title':'Reviews','subtitle':'Moderate customer feedback','model':Review,'icon':'☆','exclude':('created_at',)},
  'certificates': {'title':'Certificates','subtitle':'Issue and manage project certificates','model':Certificate,'icon':'▧','exclude':()},

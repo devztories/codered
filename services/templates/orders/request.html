@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Start Your Project | CODERED INVENTIONS{% endblock %}
+{% block content %}
+<section class="project-request-page"><div class="container project-request-shell">
+  <div class="request-heading"><div class="section-label">LET'S BUILD SOMETHING GREAT</div><h1>Start your <span>project.</span></h1><p>Choose Business or Academic, share your project name, features, budget and deadline. Our team will review your request.</p>
+    <div class="request-steps"><span><b>01</b> Choose project type</span><span><b>02</b> Share requirements</span><span><b>03</b> Get our response</span></div>
+  </div>
+  <form method="post" enctype="multipart/form-data" class="project-request-form" novalidate>{% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="request-type-cards">
+      <a href="?type=business" class="request-type-card {% if request_type == 'business' %}active{% endif %}"><i class="fa-solid fa-briefcase"></i><b>Business Project</b><small>Website, software, automation or business solution</small></a>
+      <a href="?type=academic_custom" class="request-type-card {% if request_type == 'academic_custom' %}active{% endif %}"><i class="fa-solid fa-graduation-cap"></i><b>Academic Project</b><small>Build a new project based on your requirements</small></a>
+    </div>
+    {% for field in form %}
+      {% if field.name == 'request_type' %}<div class="request-field field-full d-none">{{ field }}</div>{% endif %}
+    {% endfor %}
+    <div class="request-form-section academic-team-section" id="academicTeamSection"><div class="request-section-title"><span>01A</span><div><h2>Academic project team</h2><p>Choose whether this is an individual or group project.</p></div></div><div class="request-grid">
+      {% for field in form %}{% if field.name == "academic_team_type" or field.name == "group_size" or field.name == "group_member_names" %}<div class="request-field {% if field.name == "group_member_names" %}field-full{% endif %}" data-field="{{ field.name }}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endif %}{% endfor %}
+    </div></div>
+    <div class="request-form-section"><div class="request-section-title"><span>01</span><div><h2>Project overview</h2><p>Tell us what you want to build.</p></div></div><div class="request-grid">
+      {% for field in form %}{% if field.name == 'project' or field.name == 'title' or field.name == 'category' %}<div class="request-field {% if field.name == 'project' %}field-full{% endif %}" data-field="{{ field.name }}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<em>*</em>{% endif %}</label>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endif %}{% endfor %}
+    </div></div>
+    <div class="request-form-section"><div class="request-section-title"><span>02</span><div><h2>Features & requirements</h2><p>List the functionality you expect. For ready-made projects, add only the extra features.</p></div></div><div class="request-grid">
+      {% for field in form %}{% if field.name == 'required_features' or field.name == 'customization_features' or field.name == 'technologies' or field.name == 'requirements' %}<div class="request-field {% if field.name != 'technologies' %}field-full{% endif %}" data-field="{{ field.name }}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endif %}{% endfor %}
+    </div></div>
+    <div class="request-form-section"><div class="request-section-title"><span>03</span><div><h2>Budget & deadline</h2><p>Share your planned budget and target delivery date.</p></div></div><div class="request-grid">
+      {% for field in form %}{% if field.name == 'budget' or field.name == 'deadline' or field.name == 'reference_file' %}<div class="request-field {% if field.name == 'reference_file' %}field-full{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endif %}{% endfor %}
+    </div></div>
+    <div class="request-submit-row"><p><i class="fa-solid fa-lock"></i> Your project details are submitted privately.</p><button type="submit" class="btn btn-red btn-lg">Submit request <i class="fa-solid fa-arrow-right ms-2"></i></button></div>
+  </form>
+</div></section>
+<script>
+(function(){
+ const typeSelect=document.getElementById('id_request_type');
+ const teamSelect=document.getElementById('id_academic_team_type');
+ const teamSection=document.getElementById('academicTeamSection');
+ const groupSize=document.querySelector('[data-field="group_size"]');
+ const groupNames=document.querySelector('[data-field="group_member_names"]');
+ const cards=document.querySelectorAll('.request-type-card');
+ const projectField=document.querySelector('[data-field="project"]');
+ const projectSelect=document.getElementById('id_project');
+ const titleInput=document.getElementById('id_title');
+ const categorySelect=document.getElementById('id_category');
+ const projectData={
+ {% for item in project_options %}"{{ item.id }}":{name:"{{ item.name|escapejs }}",category:"{{ item.category }}"}{% if not forloop.last %},{% endif %}{% endfor %}
+ };
+ function fillProjectDetails(){
+   if(!projectSelect)return;
+   const item=projectData[projectSelect.value];
+   if(item){
+     if(titleInput){titleInput.value=item.name;titleInput.readOnly=true;titleInput.classList.add('catalogue-filled');}
+     if(categorySelect){categorySelect.value=item.category;categorySelect.disabled=false;categorySelect.classList.add('catalogue-filled');}
+   }else{
+     if(titleInput){titleInput.readOnly=false;titleInput.classList.remove('catalogue-filled');}
+     if(categorySelect){categorySelect.classList.remove('catalogue-filled');}
+   }
+ }
+ const customizationField=document.querySelector('[data-field="customization_features"]');
+ const requiredField=document.querySelector('[data-field="required_features"]');
+ function sync(){const t=typeSelect?typeSelect.value:'business';cards.forEach(c=>c.classList.toggle('active',c.href.includes('type='+t)));if(projectField)projectField.style.display=t==='ready_custom'?'block':'none';if(customizationField){customizationField.style.display=t==='ready_custom'?'block':'none';}if(requiredField){requiredField.style.display=t==='ready_custom'?'none':'block';}if(teamSection)teamSection.style.display=t==='academic_custom'?'block':'none';syncTeam();}
+ function syncTeam(){const group=teamSelect&&teamSelect.value==='group';if(groupSize)groupSize.style.display=group?'block':'none';if(groupNames)groupNames.style.display=group?'block':'none';}
+ cards.forEach(c=>c.addEventListener('click',function(e){if(typeSelect){e.preventDefault();const u=new URL(c.href);typeSelect.value=u.searchParams.get('type')||'business';sync();}}));if(typeSelect){typeSelect.addEventListener('change',sync);sync();}if(teamSelect){teamSelect.addEventListener('change',syncTeam);syncTeam();}if(projectSelect){projectSelect.addEventListener('change',fillProjectDetails);fillProjectDetails();}
+})();
+</script>
+<style>
+.catalogue-filled{border-color:#b58a24!important;background-color:#211d12!important;color:#fff!important}
+</style>
+{% endblock %}

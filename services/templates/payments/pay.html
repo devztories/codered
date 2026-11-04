@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-hero">
+  <div class="container narrow">
+    <p class="eyebrow">SECURE MANUAL PAYMENT</p>
+    <h1>Complete <span>your payment.</span></h1>
+    <div class="form-panel">
+      <p>Order: <strong>{{ order.order_id }}</strong></p>
+      <p class="fs-4">Amount to pay: <strong>₹{{ order.amount }}</strong></p>
+      {% if payment_settings.instructions %}<p>{{ payment_settings.instructions|linebreaksbr }}</p>{% endif %}
+      {% if payment_settings.qr_code %}
+        <div class="text-center my-4"><img class="qr" src="{{ payment_settings.qr_code.url }}" alt="CODERED INVENTIONS UPI payment QR code"><p class="mt-2">Scan this QR using any UPI app</p></div>
+      {% else %}
+        <p class="alert alert-warning">Payment QR has not been configured yet. Please contact the administrator before paying.</p>
+      {% endif %}
+      {% if upi_id %}<p><strong>UPI ID:</strong> <span>{{ upi_id }}</span></p>{% endif %}
+      {% if upi_name %}<p><strong>Payee:</strong> {{ upi_name }}</p>{% endif %}
+      {% if payment_ready %}
+      <form method="post" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        <div class="alert alert-info">Submit either one: payment screenshot OR UTR / transaction number. You do not need both.</div>
+        <label for="transaction_id" class="form-label">UPI UTR / transaction number <span class="text-secondary">(optional)</span></label>
+        <input id="transaction_id" class="form-control mb-3" name="transaction_id" maxlength="120" autocomplete="off" placeholder="Enter UTR if available">
+        <label for="receipt" class="form-label">Payment screenshot <span class="text-secondary">(optional · JPG, PNG or WEBP · max 5 MB)</span></label>
+        <input id="receipt" class="form-control mb-3" type="file" name="receipt" accept="image/jpeg,image/png,image/webp">
+        <button class="btn btn-red" type="submit">Submit payment proof</button>
+      </form>
+      {% else %}
+        <p class="alert alert-warning">UPI payment details have not been configured. Please contact the administrator.</p>
+      {% endif %}
+      <p class="mt-3 small">Your payment remains under review until an administrator checks the transaction and approves it. Uploading a screenshot does not automatically confirm payment.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

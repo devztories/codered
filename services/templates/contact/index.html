@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Contact Us | CODERED INVENTIONS{% endblock %}
+{% block content %}
+<section class="project-request-page"><div class="container project-request-shell" style="max-width:900px">
+  <div class="request-heading"><div class="section-label">LET'S CONNECT</div><h1>Tell us about <span>your idea.</span></h1><p>Share a few details. Our team will get back to you.</p></div>
+  <div class="row g-4"><div class="col-lg-8"><form method="post" class="project-request-form">{% csrf_token %}
+    {% for field in form %}<div class="request-field mb-3"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+    <div class="request-submit-row"><button class="btn btn-red btn-lg" type="submit">Send enquiry</button></div>
+  </form></div>
+  <div class="col-lg-4"><div class="tile h-100"><h4>Talk to our team</h4><p class="text-secondary">Prefer a direct conversation?</p>
+  {% if site_settings.phone %}<p><b>Call</b><br><a href="tel:{{ site_settings.phone }}">{{ site_settings.phone }}</a></p>{% endif %}
+  {% if site_settings.whatsapp_number %}<a class="btn btn-red w-100" target="_blank" rel="noopener" href="https://wa.me/{{ site_settings.whatsapp_number|cut:' '|cut:'+'|cut:'-' }}">Chat on WhatsApp</a>{% endif %}
+  {% if site_settings.contact_email %}<p class="mt-3"><b>Email</b><br><a href="mailto:{{ site_settings.contact_email }}">{{ site_settings.contact_email }}</a></p>{% endif %}
+  </div></div></div>
+</div></section>
+{% endblock %}

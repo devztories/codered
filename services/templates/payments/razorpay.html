@@ -1,0 +1,4 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-hero"><div class="container narrow"><h1>Payment page unavailable</h1><p>Online gateway checkout is not used on this website. Please return to your order and use the UPI QR payment option.</p><a class="btn btn-red" href="{% url 'orders:detail' order.order_id %}">Back to order</a></div></section>
+{% endblock %}

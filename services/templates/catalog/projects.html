@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Projects | CODERED INVENTIONS{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container">
+  <div class="section-label">OUR PROJECT STORE</div>
+  <h1>Explore <span>projects.</span></h1>
+  <p>Browse business solutions and academic projects. Academic projects can be purchased directly or customized with additional features.</p>
+
+  {% if project_type == 'academic' %}
+    <div class="academic-choice-row"><div><b>Ready-made academic projects</b><span>Buy directly, or request extra features.</span></div><a class="btn btn-red" href="{% url 'orders:request' %}?type=academic_custom">Build your own project</a></div>
+  {% elif project_type == 'business' %}
+    <div class="academic-choice-row"><div><b>Need a custom business solution?</b><span>Share your idea, deadline and budget.</span></div><a class="btn btn-red" href="{% url 'orders:request' %}?type=business">Start a business project</a></div>
+  {% else %}
+    <div class="academic-choice-row"><div><b>Academic project?</b><span>Choose a ready-made project or build one from scratch.</span></div><a class="btn btn-red" href="?type=academic">Explore academic projects</a></div>
+  {% endif %}
+
+  <form class="project-filter my-4" method="get">
+    <div class="project-filter-type">
+      <label for="projectTypeSelect">Project type</label>
+      <select id="projectTypeSelect" class="form-select" name="type">
+        <option value="" {% if not project_type %}selected{% endif %}>All projects</option>
+        <option value="business" {% if project_type == 'business' %}selected{% endif %}>Business projects</option>
+        <option value="academic" {% if project_type == 'academic' %}selected{% endif %}>Academic projects</option>
+      </select>
+    </div>
+    <div class="project-filter-search">
+      <label for="projectSearch">Search</label>
+      <input id="projectSearch" class="form-control" name="q" value="{{ q }}" placeholder="Search projects or technologies">
+    </div>
+    <div class="project-filter-category">
+      <label for="projectCategory">Category</label>
+      <select id="projectCategory" class="form-select" name="category">
+        <option value="">All categories</option>
+        {% for c in categories %}
+          <option value="{{ c.slug }}" {% if selected == c.slug %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-red project-filter-submit" type="submit">Apply</button>
+  </form>
+
+  {% if project_batches %}
+    <div class="project-carousel" data-project-carousel aria-label="Project gallery">
+      <div class="project-carousel-topline">
+        <span>{{ project_count }} projects</span>
+        {% if project_batches|length > 1 %}
+          <span class="project-carousel-hint"><i class="fa-solid fa-arrows-left-right"></i> Swipe to explore more</span>
+        {% endif %}
+      </div>
+      <div class="project-carousel-viewport">
+        <div class="project-carousel-track">
+          {% for batch in project_batches %}
+            <section class="project-slide" aria-label="Project group {{ forloop.counter }}">
+              <div class="project-slide-grid">
+                {% for p in batch %}
+                  <a class="project-card" href="{% url 'catalog:detail' p.slug %}">
+                    {% if p.cover_image %}
+                      <img src="{{ p.cover_image.url }}" alt="{{ p.name }}" loading="lazy">
+                    {% else %}
+                      <div class="project-placeholder"><i class="fa-solid fa-laptop-code"></i></div>
+                    {% endif %}
+                    <div class="project-card-content">
+                      <div class="project-meta">
+                        <small>{{ p.get_project_type_display }} · {{ p.category.name }}</small>
+                        <span class="project-status {% if p.is_published %}status-published{% else %}status-progress{% endif %}">{% if p.is_published %}Available{% else %}In progress{% endif %}</span>
+                      </div>
+                      <h5>{{ p.name }}</h5>
+                      <p>{{ p.short_description }}</p>
+                      {% if p.project_type == 'academic' and p.is_ready_made %}
+                        <div class="project-price">₹{{ p.price|floatformat:0 }} <small>Ready-made project</small></div>
+                      {% elif p.price %}
+                        <div class="project-price">From ₹{{ p.price|floatformat:0 }}</div>
+                      {% endif %}
+                      {% if p.project_type == 'academic' and p.is_ready_made and p.allow_feature_customization %}
+                        <span class="project-coming-soon">Direct buy · Add extra features</span>
+                      {% elif not p.is_published %}
+                        <span class="project-coming-soon">Preview · Not yet published</span>
+                      {% endif %}
+                    </div>
+                  </a>
+                {% endfor %}
+              </div>
+            </section>
+          {% endfor %}
+        </div>
+      </div>
+      {% if project_batches|length > 1 %}
+        <div class="project-carousel-controls">
+          <button type="button" class="project-carousel-arrow" data-project-prev aria-label="Previous projects"><i class="fa-solid fa-arrow-left"></i></button>
+          <span class="project-carousel-count" aria-live="polite">1 / {{ project_batches|length }}</span>
+          <button type="button" class="project-carousel-arrow" data-project-next aria-label="Next projects"><i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="empty-projects"><i class="fa-solid fa-folder-open"></i><h3>No projects found</h3><p>Try another search or category.</p></div>
+  {% endif %}
+</div></section>
+{% endblock %}

@@ -22,33 +22,6 @@ DEBUG = os.getenv(
 ).lower() == "true"
 
 # --------------------------------------------------
-# VERCEL TEMPLATE DIAGNOSTICS
-# --------------------------------------------------
-
-if IS_VERCEL:
-    print("========== VERCEL TEMPLATE DEBUG ==========")
-    print("BASE_DIR:", BASE_DIR)
-    print("CURRENT WORKING DIRECTORY:", Path.cwd())
-
-    print(
-        "ROOT TEMPLATE EXISTS:",
-        (BASE_DIR / "templates" / "public" / "home.html").exists()
-    )
-
-    print(
-        "SERVICES TEMPLATE EXISTS:",
-        (
-            BASE_DIR
-            / "services"
-            / "templates"
-            / "public"
-            / "home.html"
-        ).exists()
-    )
-
-    print("===========================================")
-
-# --------------------------------------------------
 # ALLOWED HOSTS
 # --------------------------------------------------
 

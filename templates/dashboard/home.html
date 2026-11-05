@@ -22,7 +22,7 @@
   {% empty %}<div class="tile">You have not placed any orders yet.</div>{% endfor %}
   </div>
   <div class="dashboard-section mt-5" id="payment-records"><h3>Payment Records</h3>
-    {% for payment in payments %}<div class="tile dashboard-record mb-2"><div class="d-flex justify-content-between align-items-start flex-wrap gap-3"><div class="flex-grow-1 min-w-0"><b>{{ payment.order.title }}</b><div class="small text-secondary">{{ payment.order.order_id }} · {{ payment.created_at|date:"d M Y, h:i A" }}</div><div class="mt-1">Amount: ₹{{ payment.amount }} · Method: UPI</div>{% if payment.transaction_id %}<div class="small">UTR: {{ payment.transaction_id }}</div>{% endif %}{% if payment.receipt %}<a class="small" href="{{ payment.receipt.url }}" target="_blank" rel="noopener">View submitted screenshot</a>{% endif %}</div><span class="payment-status payment-status-{{ payment.status }} align-self-start flex-shrink-0">{% if payment.status == 'verified' %}<span class="payment-status-icon" aria-hidden="true">✓</span><span>Verified</span>{% elif payment.status == 'submitted' %}<span>Under review</span>{% elif payment.status == 'failed' %}<span>Failed</span>{% else %}<span>{{ payment.get_status_display }}</span>{% endif %}</span></div><a class="btn btn-red dashboard-order-details mt-2" href="{% url 'orders:detail' payment.order.order_id %}">Open related order <i class="fa-solid fa-arrow-right ms-1"></i></a></div>
+    {% for payment in payments %}<div class="tile dashboard-record mb-2"><div class="d-flex justify-content-between align-items-start flex-wrap gap-3"><div class="flex-grow-1 min-w-0"><b>{{ payment.order.title }}</b><div class="small text-secondary">{{ payment.order.order_id }} · {{ payment.created_at|date:"d M Y, h:i A" }}</div><div class="mt-1">Amount: ₹{{ payment.amount }} · Method: UPI</div>{% if payment.transaction_id %}<div class="small">UTR: {{ payment.transaction_id }}</div>{% endif %}{% if payment.receipt %}<a class="small" href="{{ payment.receipt.url }}" target="_blank" rel="noopener">View submitted screenshot</a>{% endif %}</div><span class="payment-status payment-status-{{ payment.status }} align-self-start flex-shrink-0">{% if payment.status == 'verified' %}<span class="payment-status-icon" aria-hidden="true">✓</span><span>Verified</span>{% elif payment.status == 'submitted' %}<span>Under review</span>{% elif payment.status == 'failed' %}<span>Failed</span>{% else %}<span>{{ payment.get_status_display }}</span>{% endif %}</span></div><a class="btn btn-red dashboard-order-details dashboard-related-order-btn mt-2" href="{% url 'orders:detail' payment.order.order_id %}">Open related order</a></div>
     {% empty %}<div class="tile">No payment records yet.</div>{% endfor %}
   </div>
   <div class="dashboard-section mt-5" id="certificates"><h3>Certificates</h3>
@@ -31,12 +31,12 @@
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
           <div class="certificate-preview-trigger" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#certificatePreview{{ c.pk }}" aria-label="Preview certificate for {{ c.recipient_name }}">
             <img class="certificate-preview-image" src="{% url 'certificates:preview' c.certificate_id %}" alt="Certificate preview for {{ c.recipient_name }}">
-            <div class="small text-secondary text-center mt-2"><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge preview</div>
+            
           </div>
           <div class="flex-grow-1">
             <b>{{ c.project_name }}</b>
             <div class="small text-secondary">{{ c.recipient_name }} · {{ c.certificate_id }} · {{ c.completion_date|date:"d M Y" }}</div>
-            {% if not c.revoked %}<a class="btn btn-red btn-sm mt-3" href="{% url 'certificates:download' c.certificate_id %}">Download certificate</a>{% if not c.order.review %}<a class="btn btn-red btn-sm mt-3 ms-2" href="{% url 'reviews:create' c.order.order_id %}">Write a review <i class="fa-solid fa-arrow-right ms-1"></i></a>{% endif %}{% else %}<span class="status-chip mt-2">Revoked</span>{% endif %}
+            {% if not c.revoked %}<a class="btn btn-red dashboard-action-btn mt-3" href="{% url 'certificates:download' c.certificate_id %}">Download certificate</a>{% if not c.order.review %}<a class="btn btn-red dashboard-action-btn dashboard-review-btn mt-3" href="{% url 'reviews:create' c.order.order_id %}">Write a review</a>{% endif %}{% else %}<span class="status-chip mt-2">Revoked</span>{% endif %}
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@
 .payment-status-submitted{color:#ffd77a;background:#3a2c0b;border-color:#9a741b}
 .payment-status-pending{color:#ddd;background:#292929;border-color:#666}
 .payment-status-failed{color:#ff9999;background:#3b1717;border-color:#9c3434}
-.certificate-preview-trigger{width:min(100%,290px);cursor:zoom-in}.certificate-preview-image{display:block;width:100%;height:auto;border:1px solid #c49a32;box-shadow:0 8px 28px #0008}.certificate-preview-image-large{width:auto;max-width:100%;max-height:78vh;margin:auto;object-fit:contain}
+.certificate-preview-trigger{width:100%;max-width:100%;cursor:zoom-in;flex:0 0 100%}.certificate-preview-image{display:block;width:100%;height:auto;border:1px solid #c49a32;box-shadow:0 8px 28px #0008}.certificate-preview-image-large{width:auto;max-width:100%;max-height:78vh;margin:auto;object-fit:contain}
 .certificate-mini,.certificate-large{position:relative;overflow:hidden;text-align:center;color:#181818;background:#faf9f5;border:5px double #c49a32;box-shadow:0 8px 28px #0008}
 .certificate-mini{aspect-ratio:1/1.414;padding:13px 10px;border-width:3px}
 .certificate-mini:before,.certificate-large:before{content:"";position:absolute;inset:8px;border:1px solid #b82029;pointer-events:none}
@@ -90,3 +90,13 @@
 
 </style>
 {% endblock %}
+
+<style>
+/* Keep dashboard actions visually consistent with the main Explore Projects CTA. */
+.customer-dashboard .dashboard-action-btn,.customer-dashboard .dashboard-order-details{display:flex!important;width:100%!important;min-width:0!important;min-height:48px!important;height:48px!important;align-items:center!important;justify-content:center!important;padding:12px 18px!important;border-radius:6px!important;font-size:15px!important;font-weight:700!important;line-height:1.2!important;text-align:center!important;white-space:normal!important;box-sizing:border-box!important;margin-left:0!important;margin-right:0!important}
+.customer-dashboard .dashboard-review-btn{background:#ed1c24!important;border-color:#ed1c24!important;color:#fff!important}
+.customer-dashboard .dashboard-related-order-btn{gap:0!important}
+.customer-dashboard .certificate-preview-trigger{width:100%;max-width:100%;flex-basis:100%}
+.customer-dashboard .certificate-preview-trigger img{width:100%;max-width:100%;height:auto;object-fit:contain}
+@media(min-width:768px){.customer-dashboard #certificates .dashboard-record>.d-flex{flex-direction:column!important;align-items:stretch!important}.customer-dashboard #certificates .dashboard-record>.d-flex>div:last-child{width:100%}}
+</style>

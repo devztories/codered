@@ -56,7 +56,7 @@ def generate(request, order_id):
                     project_name=order.title, completion_date=timezone.localdate())
             created.append(cert)
         messages.success(request, f"{len(created)} individual group certificates are ready.")
-        return redirect("certificates:index")
+        return redirect("orders:detail", order_id=order.order_id)
 
     existing = Certificate.objects.filter(order=order, user=request.user, revoked=False).first()
     if existing:

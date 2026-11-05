@@ -34,6 +34,10 @@ class Order(models.Model):
    if not self.payments.filter(status='verified').exists():
     raise ValidationError('Verify payment before marking this project as delivered.')
   super().save(*a,**k)
+  # Keep payment records in sync when an administrator marks an order as paid.
+  if self.status == 'paid' and self.pk:
+   from django.utils import timezone
+   self.payments.exclude(status='verified').update(status='verified', verified_at=timezone.now())
  @property
  def stage_progress(self):
   return {'discussed': 0, 'started': 1, 'completed': 2, 'delivered': 3}.get(self.stage, 0)

@@ -22,6 +22,11 @@ def pay(request, order_id):
         messages.info(request, "This order is already marked as paid.")
         return redirect("orders:detail", order_id=order.order_id)
 
+    # Once proof has been submitted, never show the QR/payment form again.
+    if order.payments.filter(status__in=["submitted", "verified"]).exists():
+        messages.info(request, "Your payment proof is already submitted or verified.")
+        return redirect("orders:detail", order_id=order.order_id)
+
     if request.method == "POST":
         receipt = request.FILES.get("receipt")
         transaction_id = request.POST.get("transaction_id", "").strip()[:120]

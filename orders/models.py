@@ -42,3 +42,36 @@ class Quotation(models.Model):
  order=models.ForeignKey(Order,on_delete=models.CASCADE,related_name='quotations'); amount=models.DecimalField(max_digits=10,decimal_places=2); notes=models.TextField(blank=True); valid_until=models.DateField(null=True,blank=True); accepted=models.BooleanField(default=False); created_at=models.DateTimeField(auto_now_add=True)
 class OrderUpdate(models.Model):
  order=models.ForeignKey(Order,on_delete=models.CASCADE,related_name='updates'); message=models.TextField(); created_by=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL,null=True); created_at=models.DateTimeField(auto_now_add=True)
+
+
+class OrderAssignment(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='employee_assignments')
+    employee = models.ForeignKey('accounts.EmployeeProfile', on_delete=models.CASCADE, related_name='assignments')
+    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_assignments')
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['-assigned_at']
+        constraints = [models.UniqueConstraint(fields=['order', 'employee'], condition=models.Q(is_active=True), name='unique_active_order_employee')]
+
+    def __str__(self):
+        return f'{self.order.order_id} → {self.employee}'
+
+
+class OrderWorkUpdate(models.Model):
+    STAGES = [('discussed', 'Project Discussed'), ('started', 'Project Started'), ('testing', 'Testing'), ('completed', 'Completed'), ('delivered', 'Delivered')]
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='work_updates')
+    employee = models.ForeignKey('accounts.EmployeeProfile', on_delete=models.SET_NULL, null=True, related_name='work_updates')
+    stage = models.CharField(max_length=16, choices=STAGES, default='started')
+    progress_percent = models.PositiveSmallIntegerField(default=0)
+    expected_delivery_date = models.DateField(null=True, blank=True)
+    message = models.TextField()
+    is_customer_visible = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.order.order_id} · {self.progress_percent}%'

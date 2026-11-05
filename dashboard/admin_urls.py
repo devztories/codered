@@ -3,6 +3,7 @@ from . import admin_views
 app_name = 'control'
 urlpatterns = [
     path('', admin_views.admin_home, name='home'),
+    path('workforce/', admin_views.admin_workforce, name='workforce'),
     path('<slug:module>/', admin_views.admin_module, name='module'),
     path('orders/<int:pk>/details/', admin_views.admin_order_detail, name='order_detail'),
     path('<slug:module>/add/', admin_views.admin_edit, name='add'),

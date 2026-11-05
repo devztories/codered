@@ -64,6 +64,7 @@ def order_detail(request, order_id):
     payment_submitted = order.payments.filter(status="submitted").exists()
     return render(request, "orders/detail.html", {
         "order": order,
+        "work_updates": order.work_updates.filter(is_customer_visible=True).select_related("employee__user"),
         "payment_verified": payment_verified,
         "payment_submitted": payment_submitted,
         "is_complete": order.stage in {"completed", "delivered"},

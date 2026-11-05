@@ -1,0 +1,24 @@
+CODERED EMPLOYEE WORKSPACE SETUP
+================================
+
+1. Run database migrations after deploying these files:
+   python manage.py migrate
+
+2. Create a normal employee login in Admin > Users (or use an existing normal account).
+   Do not mark the employee account as Django staff or superuser.
+
+3. In Admin > Employees > Add employee, link the login account and set designation, department and active status.
+
+4. Employees sign in using their own account and are sent to /admin/, the shared CODERED workspace.
+
+5. Employee permissions are Admin-like for all operational and content modules: Projects, Project Requests, Orders, Categories, Subcategories, Services, Users, Employees, Enquiries, Reviews, Certificates, Certificate Design, Chatbot and Team Workload. Employees can add, edit and delete records in those modules.
+
+6. Employees are blocked from Payments, Payment Settings and Contact/Site Settings. These routes are also protected server-side; hiding the menu is not the only restriction. Payment/revenue panels are not shown in employee sessions.
+
+7. Employees can assign/reassign project work, review all employee workload, and update project progress. Customer-visible progress updates appear in the customer's order view; internal notes remain private to the workspace.
+
+SECURITY NOTES
+--------------
+- Employee accounts remain non-staff users and cannot change is_staff or is_superuser through the Users form.
+- Payment verification, payment records/settings and contact/site settings remain administrator-only.
+- Create employee access by adding an EmployeeProfile for a normal active user. Deactivate the profile or user to revoke access.

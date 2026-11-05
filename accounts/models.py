@@ -17,3 +17,26 @@ class User(AbstractUser):
  def __str__(self): return self.email or self.phone_number or self.name
 class UserProfile(models.Model):
  user=models.OneToOneField(User,on_delete=models.CASCADE,related_name='profile'); address=models.TextField(blank=True); city=models.CharField(max_length=100,blank=True); state=models.CharField(max_length=100,blank=True); avatar=models.ImageField(upload_to='avatars/',blank=True); created_at=models.DateTimeField(auto_now_add=True)
+
+
+class EmployeeProfile(models.Model):
+    """Operational employee account; employees are ordinary non-staff users."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='employee_profile')
+    employee_code = models.CharField(max_length=24, unique=True, blank=True)
+    designation = models.CharField(max_length=120, blank=True)
+    department = models.CharField(max_length=120, blank=True)
+    is_active = models.BooleanField(default=True)
+    joined_at = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.employee_code:
+            last = EmployeeProfile.objects.order_by('-pk').first()
+            self.employee_code = f'CRI-EMP-{(last.pk if last else 0) + 1:04d}'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.employee_code} · {self.user.name or self.user.email or self.user.phone_number}'
+
+    class Meta:
+        ordering = ['employee_code']

@@ -878,3 +878,78 @@ main { animation:coderedPageEnter .24s ease-out both; }
   .project-request-form .btn-red, .project-detail-shell .btn-red,
   .academic-choice-row .btn-red { width: 100%; }
 }
+
+
+/* Mobile alignment hardening: keep every homepage section inside the viewport grid. */
+.home-page,
+.home-page section,
+.home-page .home-content,
+.home-page .home-content > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+.home-page .section.container,
+.home-page .section > .container {
+  width: 100%;
+  max-width: 1160px;
+  padding-left: clamp(20px, 5vw, 32px);
+  padding-right: clamp(20px, 5vw, 32px);
+  margin-left: auto;
+  margin-right: auto;
+}
+.home-page .home-content {
+  width: 100%;
+  max-width: 850px;
+  margin-inline: 0 auto;
+  overflow-wrap: anywhere;
+}
+.home-page .section-label,
+.home-page h2,
+.home-page .section-copy,
+.home-page .home-actions {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767.98px) {
+  .home-page .section.container,
+  .home-page .section > .container {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .home-page .home-content { width: 100%; max-width: 100%; }
+  .home-page .home-content h2 { text-align: left; }
+  .home-page .home-actions { width: 100%; }
+  .home-page .home-actions .btn { width: 100%; min-width: 0; }
+}
+
+/* Dashboard primary actions use matching dimensions and stack cleanly on phones. */
+.dashboard-primary-actions .btn {
+  display: inline-flex;
+  flex: 1 1 220px;
+  min-width: 220px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  text-align: center;
+}
+.dashboard-order-details {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 18px;
+  white-space: normal;
+}
+@media (max-width: 575.98px) {
+  .dashboard-primary-actions { display: flex; flex-direction: column; }
+  .dashboard-primary-actions .btn { width: 100%; min-width: 0; flex: 0 0 auto; }
+  .dashboard-order-details { width: 100%; }
+}
+
+/* Make the native date-picker glyph visible in the CODERED red accent. */
+.project-request-form input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(14%) sepia(98%) saturate(6000%) hue-rotate(350deg) brightness(98%) contrast(105%);
+  opacity: 1;
+  cursor: pointer;
+}
+.project-request-form input[type="date"] { color-scheme: dark; }

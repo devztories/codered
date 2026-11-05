@@ -18,6 +18,8 @@ def login_view(request):
  if request.method=='POST' and form.is_valid():
   user=form.get_user(); login(request,user)
   if user.is_staff: return redirect('/admin/')
+  from .models import EmployeeProfile
+  if EmployeeProfile.objects.filter(user=user, is_active=True, user__is_active=True).exists(): return redirect('/admin/')
   return redirect(request.GET.get('next') or 'dashboard:home')
  return render(request,'accounts/form.html',{'form':form,'title':'Welcome back'})
 def logout_view(request):

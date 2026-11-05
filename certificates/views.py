@@ -206,7 +206,20 @@ def _certificate_image(request, certificate):
     centered_in_box(settings_obj.issue_date_label, 95, 365, 1058, small, muted)
 
     signatory_name = (settings_obj.mentor_signature_text or "").strip()
-    if signatory_name and signatory_name.casefold() != "project mentor":
+    signature_added = False
+    if settings_obj.mentor_signature_image:
+        try:
+            with settings_obj.mentor_signature_image.open("rb") as signature_file:
+                signature = Image.open(signature_file).convert("RGBA")
+                max_size = (max(1, int(250 * sx)), max(1, int(92 * sy)))
+                signature.thumbnail(max_size, Image.Resampling.LANCZOS)
+                signature_x = int(810 * sx - signature.width / 2)
+                signature_y = int(940 * sy + (92 * sy - signature.height) / 2)
+                image.paste(signature, (signature_x, signature_y), signature)
+                signature_added = True
+        except (OSError, ValueError):
+            signature_added = False
+    if not signature_added and signatory_name and signatory_name.casefold() != "project mentor":
         centered_in_box(signatory_name, 675, 945, 995, script, white)
     draw.line((int(675 * sx), int(1048 * sy), int(945 * sx), int(1048 * sy)),
               fill=red, width=max(2, int(3 * scale)))

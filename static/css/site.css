@@ -662,3 +662,219 @@ main { animation:coderedPageEnter .24s ease-out both; }
   .dashboard-shortcut { min-height: 130px; padding: 14px !important; }
   .dashboard-order-details { min-width: 0; margin-inline: auto; }
 }
+
+/* Project catalogue: one complete card per view, navigated only by touch/trackpad swipe. */
+.project-row-wrap { display:block; width:100%; min-width:0; }
+.project-catalogue-grid[data-project-row] {
+  display:flex;
+  flex-wrap:nowrap;
+  gap:16px;
+  width:100%;
+  min-width:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:3px 1px 16px;
+  scroll-snap-type:x mandatory;
+  scroll-snap-stop:always;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  touch-action:pan-x pan-y;
+  scrollbar-width:none;
+}
+.project-catalogue-grid[data-project-row]::-webkit-scrollbar { display:none; }
+.project-catalogue-grid[data-project-row] > .project-card {
+  flex:0 0 100%;
+  width:100%;
+  min-width:0;
+  min-height:330px;
+  display:grid;
+  grid-template-columns:minmax(240px,42%) minmax(0,1fr);
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+}
+.project-catalogue-grid[data-project-row] > .project-card > img,
+.project-catalogue-grid[data-project-row] > .project-card > .project-placeholder {
+  width:100%;
+  height:100%;
+  min-height:330px;
+  object-fit:cover;
+}
+.project-catalogue-grid[data-project-row] > .project-card > .project-card-content {
+  align-self:center;
+  padding:clamp(20px,4vw,42px);
+}
+.project-catalogue-grid[data-project-row] .project-card h5 { font-size:clamp(1.25rem,2.5vw,2rem); }
+.project-catalogue-grid[data-project-row] .project-card p { font-size:1rem; line-height:1.75; }
+.project-catalogue-topline > span:last-child { text-align:right; }
+@media(max-width:600px) {
+  .project-catalogue-grid[data-project-row] { gap:12px; }
+  .project-catalogue-grid[data-project-row] > .project-card {
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:190px auto;
+    min-height:0;
+  }
+  .project-catalogue-grid[data-project-row] > .project-card > img,
+  .project-catalogue-grid[data-project-row] > .project-card > .project-placeholder {
+    height:190px;
+    min-height:190px;
+  }
+  .project-catalogue-grid[data-project-row] > .project-card > .project-card-content { padding:18px; }
+  .project-catalogue-topline { align-items:flex-start; flex-direction:column; }
+  .project-catalogue-topline > span:last-child { text-align:left; }
+}
+
+/* Homepage sections share a single left-aligned content grid and matching CTA controls. */
+.home-page .home-content { width:100%; max-width:850px; margin:0; text-align:left; }
+.home-page .home-content .section-copy { max-width:720px; }
+.home-page .home-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:22px; }
+.home-page .home-actions .btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:220px;
+  min-width:220px;
+  min-height:48px;
+  padding:12px 18px;
+  border-radius:10px;
+  font-size:.95rem;
+  font-weight:700;
+  line-height:1.2;
+  text-align:center;
+  white-space:normal;
+}
+.home-page .home-actions .btn i { display:inline-flex; align-items:center; justify-content:center; width:16px; min-width:16px; height:16px; font-size:14px; line-height:1; }
+.home-page .hero .home-content { position:relative; z-index:1; }
+.home-page .hero .home-content p { max-width:590px; }
+.home-page #about .home-content,
+.home-page #services .home-content,
+.home-page #projects .home-content,
+.home-page #reviews .home-content,
+.home-page #contact .home-content { margin-left:0; margin-right:auto; }
+.home-page #about h2,
+.home-page #services h2,
+.home-page #projects h2,
+.home-page #reviews h2,
+.home-page #contact h2 { text-align:left; }
+@media(max-width:575.98px) {
+  .home-page .home-actions { align-items:stretch; }
+  .home-page .home-actions .btn { width:100%; min-width:0; }
+}
+
+/* Order action buttons match the catalogue Apply control on desktop and fit mobile screens. */
+.dashboard-order-details {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:150px;
+  min-height:46px;
+  padding:.7rem 1.25rem;
+  font-size:.95rem;
+  font-weight:700;
+  line-height:1.2;
+  white-space:normal;
+  text-align:center;
+  align-self:center;
+}
+@media(max-width:575.98px) {
+  .dashboard-record > .d-flex > .dashboard-order-details,
+  .dashboard-record > .dashboard-order-details { width:100%; min-width:0; }
+}
+
+/* Explicit terminal state for cancelled orders. */
+.project-tracker-cancelled .tracker-current { color:#ff8585; border-color:#a83b42; background:#351518; }
+.tracker-cancelled-message {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:18px;
+  padding:16px 18px;
+  border:1px solid #8c3038;
+  border-radius:12px;
+  background:#2b1114;
+  color:#ffb2b6;
+  font-weight:700;
+}
+.tracker-cancelled-message i { font-size:1.2rem; color:#ff626b; }
+
+
+/* Project cards: consistent dimensions and only the requested summary details. */
+.project-catalogue-grid[data-project-row] > .project-card {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 360px;
+  min-height: 360px;
+  display: grid;
+  grid-template-columns: minmax(240px, 40%) minmax(0, 1fr);
+  align-items: stretch;
+  overflow: hidden;
+}
+.project-catalogue-grid[data-project-row] > .project-card > img,
+.project-catalogue-grid[data-project-row] > .project-card > .project-placeholder {
+  width: 100%; height: 360px; min-height: 360px; object-fit: cover;
+}
+.project-catalogue-grid[data-project-row] > .project-card > .project-card-content {
+  min-width: 0; height: 100%; display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: center; padding: clamp(20px, 4vw, 42px);
+}
+.project-category-label {
+  display: inline-flex; align-items: center; min-height: 28px; padding: 5px 11px;
+  border: 1px solid #ed1c245c; border-radius: 999px; background: #ed1c2415;
+  color: #ff656b; font-size: .75rem; font-weight: 800; letter-spacing: .04em;
+}
+.project-catalogue-grid[data-project-row] .project-card h5 {
+  margin: 15px 0 9px; font-size: clamp(1.3rem, 2.5vw, 2rem);
+  line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.project-catalogue-grid[data-project-row] .project-card p {
+  margin: 0; color: #aaa; font-size: .98rem; line-height: 1.65;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.project-catalogue-grid[data-project-row] .project-price {
+  margin-top: auto; padding-top: 20px; color: #fff; font-size: 1.45rem; font-weight: 800;
+}
+@media (max-width: 600px) {
+  .project-catalogue-grid[data-project-row] > .project-card {
+    height: 410px; min-height: 410px; grid-template-columns: minmax(0,1fr);
+    grid-template-rows: 180px minmax(0,1fr);
+  }
+  .project-catalogue-grid[data-project-row] > .project-card > img,
+  .project-catalogue-grid[data-project-row] > .project-card > .project-placeholder {
+    height: 180px; min-height: 180px;
+  }
+  .project-catalogue-grid[data-project-row] > .project-card > .project-card-content { padding: 17px 18px; }
+  .project-catalogue-grid[data-project-row] .project-card h5 { margin: 10px 0 7px; font-size: 1.2rem; }
+  .project-catalogue-grid[data-project-row] .project-card p { font-size: .88rem; -webkit-line-clamp: 2; }
+  .project-catalogue-grid[data-project-row] .project-price { padding-top: 10px; font-size: 1.25rem; }
+}
+
+/* CODERED request flow and system alerts use the red / black / white palette. */
+.alert, .alert-success, .alert-info, .alert-warning, .alert-danger {
+  color: #f7f7f7 !important; background: #111 !important;
+  border: 1px solid #ed1c24 !important; border-left-width: 4px !important;
+  border-radius: 10px; box-shadow: 0 8px 24px #0005;
+}
+.alert .btn-close { filter: invert(1) grayscale(1); opacity: .85; }
+.form-alert { color: #fff !important; background: #111 !important;
+  border: 1px solid #ed1c24 !important; border-left-width: 4px !important; }
+.project-request-form .btn-red,
+.project-detail-shell .btn-red,
+.academic-choice-row .btn-red {
+  min-height: 48px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 9px; padding: 12px 22px; border: 1px solid #ed1c24;
+  background: #ed1c24; color: #fff; font-weight: 800; border-radius: 10px;
+}
+.project-request-form .btn-red:hover,
+.project-detail-shell .btn-red:hover,
+.academic-choice-row .btn-red:hover { background: #111; border-color: #ed1c24; color: #fff; }
+.request-type-card { background: #111; border-color: #383838; color: #fff; }
+.request-type-card.active, .request-type-card:hover { background: #1a1011; border-color: #ed1c24; }
+.request-submit-row { border-top-color: #383838; }
+.request-submit-row p { color: #ddd; }
+.request-submit-row p i { color: #ed1c24; }
+@media (max-width: 650px) {
+  .project-request-form .btn-red, .project-detail-shell .btn-red,
+  .academic-choice-row .btn-red { width: 100%; }
+}

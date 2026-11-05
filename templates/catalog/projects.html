@@ -43,24 +43,22 @@
     <div class="project-catalogue" id="projectCatalogue">
       <div class="project-catalogue-topline">
         <span>{{ project_count }} projects · 10 per page</span>
-        <span><i class="fa-solid fa-arrows-left-right"></i> Swipe left / right to browse</span>
+        <span>Swipe left or right to browse projects</span>
       </div>
       <div class="project-row-wrap">
-        <button class="project-row-arrow project-row-prev" type="button" aria-label="Scroll projects left"><i class="fa-solid fa-chevron-left"></i></button>
         <div class="project-catalogue-grid" data-project-row tabindex="0" aria-label="Swipe horizontally to browse projects">
         {% for p in page_obj %}
           <a class="project-card" href="{% url 'catalog:detail' p.slug %}">
             {% if p.cover_image %}<img src="{{ p.cover_image.url }}" alt="{{ p.name }}" loading="lazy">{% else %}<div class="project-placeholder"><i class="fa-solid fa-laptop-code"></i></div>{% endif %}
             <div class="project-card-content">
-              <div class="project-meta"><small>{{ p.get_project_type_display }} · {{ p.category.name }}</small><span class="project-status {% if p.is_published %}status-published{% else %}status-progress{% endif %}">{% if p.is_published %}Available{% else %}In progress{% endif %}</span></div>
-              <h5>{{ p.name }}</h5><p>{{ p.short_description }}</p>
-              {% if p.project_type == 'academic' and p.is_ready_made %}<div class="project-price">₹{{ p.price|floatformat:0 }} <small>Ready-made project</small></div>{% elif p.price %}<div class="project-price">From ₹{{ p.price|floatformat:0 }}</div>{% endif %}
-              <span class="project-card-action">View project <i class="fa-solid fa-arrow-right"></i></span>
+              <span class="project-category-label">{{ p.category.name }}</span>
+              <h5>{{ p.name }}</h5>
+              <p>{{ p.short_description }}</p>
+              <div class="project-price">₹{{ p.price|floatformat:0 }}</div>
             </div>
           </a>
         {% endfor %}
         </div>
-        <button class="project-row-arrow project-row-next" type="button" aria-label="Scroll projects right"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
       {% if page_obj.paginator.num_pages > 1 %}
         <nav class="project-pagination" aria-label="Project pages">

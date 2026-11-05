@@ -1,0 +1,23 @@
+CODERED UPDATE NOTES - CERTIFICATE SIGNATURE, PROJECT CARDS, REQUEST THEME
+
+1. Certificate design settings now include an admin-uploadable Project Mentor Signature Image.
+   - Upload from Django Admin > Certificates > Certificate design settings.
+   - Transparent PNG is recommended.
+   - The uploaded signature is rendered above the mentor signature line on generated certificate PDFs/previews.
+   - New migration: certificates/0003_add_mentor_signature_image.py
+
+2. Project catalogue cards now show only:
+   - Project name
+   - Short description
+   - Category
+   - Price
+   Academic/Business type and availability/status remain on the project detail page.
+   Cards use a consistent full-width size and preserve swipe navigation.
+
+3. Request Project and Submit Request actions use the CodeRed red, black and white palette.
+   Bootstrap alerts and request form validation alerts use the same palette.
+
+After replacing files, run:
+   python manage.py migrate
+
+No other model fields were changed in this update.

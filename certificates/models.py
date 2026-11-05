@@ -43,6 +43,10 @@ class CertificateDesignSettings(models.Model):
     issue_date_label = models.CharField(max_length=60, default="DATE OF ISSUE")
     verification_label = models.CharField(max_length=60, default="Verify Certificate")
     mentor_signature_text = models.CharField(max_length=100, default="Project Mentor")
+    mentor_signature_image = models.ImageField(
+        upload_to="certificate/signatures/", blank=True,
+        help_text="Upload the project mentor’s signature. A transparent PNG is recommended.",
+    )
     mentor_title = models.CharField(max_length=100, default="Project Mentor")
     company_name = models.CharField(max_length=120, default="CodeRed Invention")
     website = models.CharField(max_length=120, default="www.coderedinvention.com")

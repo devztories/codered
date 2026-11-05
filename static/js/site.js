@@ -157,17 +157,6 @@
     }
   });
 
-  // Horizontal project rail: touch-swipe on phones and arrow controls on desktop.
-  document.querySelectorAll('.project-row-wrap').forEach(wrapper => {
-    const rail = wrapper.querySelector('[data-project-row]');
-    wrapper.querySelector('.project-row-prev')?.addEventListener('click', () => {
-      rail?.scrollBy({ left: -Math.max(rail.clientWidth * 0.8, 220), behavior: 'smooth' });
-    });
-    wrapper.querySelector('.project-row-next')?.addEventListener('click', () => {
-      rail?.scrollBy({ left: Math.max(rail.clientWidth * 0.8, 220), behavior: 'smooth' });
-    });
-  });
-
 
 })();
 

@@ -16,7 +16,7 @@ class CertificateDesignSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Main certificate text", {"fields": ("certificate_heading", "ribbon_text", "intro_text", "completion_text", "body_text")}),
         ("Certificate identifiers", {"fields": ("certificate_prefix", "company_id", "issue_date_label", "verification_label")}),
-        ("Mentor and company details", {"fields": ("mentor_signature_text", "mentor_title", "company_name", "website", "location")}),
+        ("Mentor and company details", {"fields": ("mentor_signature_text", "mentor_signature_image", "mentor_title", "company_name", "website", "location")}),
     )
 
     def has_add_permission(self, request):

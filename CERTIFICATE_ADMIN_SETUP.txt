@@ -24,3 +24,10 @@ Important
 - QR links use the request host and resolve to the certificate verification URL.
 - Run a test certificate preview and PDF after deployment to verify font/layout in the
   target environment.
+
+MENTOR SIGNATURE IMAGE (added in the latest update)
+1. Open Django Admin > Certificates > Certificate design settings.
+2. Upload the Project Mentor Signature Image in the Mentor and company details section.
+3. A transparent PNG is recommended for the cleanest result on the certificate.
+4. Save the settings. Newly generated and previewed certificates will use this signature above the mentor signature line.
+5. Apply the new database migration: python manage.py migrate

@@ -1,0 +1,12 @@
+CODERED INVENTIONS - UPDATE NOTES
+
+This archive preserves the original uploaded project and its Git history.
+
+Applied updates:
+- HTML responses receive no-store cache headers to reduce stale pages on browser Back/refresh.
+- Profile update uses POST-Redirect-GET.
+- Payment proof submission redirects to Order Detail.
+- Existing submitted/verified payment redirects away from the QR payment page.
+- Order detail uses payment_submitted to show the payment queue state.
+
+Important: Review other customer form views individually for POST-Redirect-GET. Global cache headers alone do not prevent duplicate submissions.

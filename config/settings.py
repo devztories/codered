@@ -68,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core_middleware.ServiceUnavailablePageMiddleware",
+    "core_middleware.NoStoreHtmlMiddleware",
 ]
 
 # --------------------------------------------------

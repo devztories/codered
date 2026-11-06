@@ -27,6 +27,20 @@ def logout_view(request):
  return redirect('home')
 @login_required
 def profile(request):
- p,_=UserProfile.objects.get_or_create(user=request.user); form=ProfileForm(request.POST or None,request.FILES or None,instance=p)
- if request.method=='POST' and form.is_valid(): form.save(); messages.success(request,'Profile updated.')
- return render(request,'accounts/form.html',{'form':form,'title':'My profile'})
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    form = ProfileForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=profile,
+    )
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Profile updated.")
+        return redirect("accounts:profile")
+
+    return render(
+        request,
+        "accounts/form.html",
+        {"form": form, "title": "My profile"},
+    )

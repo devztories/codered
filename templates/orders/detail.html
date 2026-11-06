@@ -36,10 +36,7 @@
     <div class="tile mt-3">
       <h4>Project requirements</h4>
 
-      <p>
-        <b>Type:</b>
-        {{ order.request.get_request_type_display }}
-      </p>
+      <p><b>Type:</b> {{ order.request.get_request_type_display }}</p>
 
       <p>
         <b>Features:</b>
@@ -60,21 +57,11 @@
         {% endif %}
       </p>
 
-      <p>
-        <b>Deadline:</b>
-        {{ order.request.deadline|default:'Not specified' }}
-      </p>
+      <p><b>Deadline:</b> {{ order.request.deadline|default:'Not specified' }}</p>
 
       {% if order.request.academic_team_type == 'group' %}
-        <p>
-          <b>Team:</b>
-          Group · {{ order.request.group_size }} members
-        </p>
-
-        <p>
-          <b>Members:</b><br>
-          {{ order.request.group_member_names|linebreaksbr }}
-        </p>
+        <p><b>Team:</b> Group · {{ order.request.group_size }} members</p>
+        <p><b>Members:</b><br>{{ order.request.group_member_names|linebreaksbr }}</p>
       {% endif %}
     </div>
     {% endif %}
@@ -92,11 +79,20 @@
     <div class="order-actions d-flex flex-wrap gap-2 mt-4">
 
       {% if not payment_verified and order.amount > 0 %}
-        <a
-          class="btn btn-red order-action-btn"
-          href="{% url 'payments:pay' order.order_id %}">
-          Complete Your Payment
-        </a>
+
+        {% if payment_submitted %}
+          <span class="btn btn-outline-light order-action-btn payment-queue-btn" aria-live="polite">
+            <i class="fa-solid fa-clock me-2" aria-hidden="true"></i>
+            Your Payment in Queue
+          </span>
+        {% else %}
+          <a
+            class="btn btn-red order-action-btn"
+            href="{% url 'payments:pay' order.order_id %}">
+            Complete Your Payment
+          </a>
+        {% endif %}
+
       {% endif %}
 
       <!-- Certificate request workflow -->
@@ -125,9 +121,7 @@
 
               {% csrf_token %}
 
-              <button
-                class="btn btn-red order-action-btn"
-                type="submit">
+              <button class="btn btn-red order-action-btn" type="submit">
                 Request Certificate
               </button>
 
@@ -154,19 +148,12 @@
     <!-- Payment required modal -->
     {% if is_complete and not payment_verified and not payment_submitted %}
 
-    <div
-      class="modal fade"
-      id="paymentRequiredModal"
-      tabindex="-1"
-      aria-hidden="true">
-
+    <div class="modal fade" id="paymentRequiredModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
-
         <div class="modal-content bg-dark text-white border-secondary">
 
           <div class="modal-header border-secondary">
             <h5 class="modal-title">Complete Your Payment</h5>
-
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -208,19 +195,12 @@
     <!-- Payment review modal -->
     {% if is_complete and not payment_verified and payment_submitted %}
 
-    <div
-      class="modal fade"
-      id="paymentReviewModal"
-      tabindex="-1"
-      aria-hidden="true">
-
+    <div class="modal fade" id="paymentReviewModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
-
         <div class="modal-content bg-dark text-white border-secondary">
 
           <div class="modal-header border-secondary">
             <h5 class="modal-title">Reviewing Your Payment</h5>
-
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -278,15 +258,9 @@
 
     {% for u in work_updates %}
       <div class="tile mb-2">
-
         <div class="d-flex justify-content-between flex-wrap">
-          <b>
-            {{ u.get_stage_display }} · {{ u.progress_percent }}%
-          </b>
-
-          <small>
-            {{ u.created_at|date:"d M Y, h:i A" }}
-          </small>
+          <b>{{ u.get_stage_display }} · {{ u.progress_percent }}%</b>
+          <small>{{ u.created_at|date:"d M Y, h:i A" }}</small>
         </div>
 
         <p class="mb-1">{{ u.message }}</p>
@@ -297,7 +271,6 @@
             {{ u.expected_delivery_date|date:"d M Y" }}
           </small>
         {% endif %}
-
       </div>
     {% endfor %}
 
@@ -340,6 +313,12 @@
 
   .order-actions form {
     width: 100%;
+  }
+
+  .payment-queue-btn {
+    cursor: default !important;
+    opacity: 1 !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
   }
 
   .modal {

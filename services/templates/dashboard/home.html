@@ -3,11 +3,10 @@
 {% block content %}
 <section class="page-hero customer-dashboard"><div class="container">
   <div class="section-label">CUSTOMER PORTAL</div><h1>My <span>Dashboard</span></h1>
-  <p class="text-secondary">Your projects, payments and certificates in one place.</p>
+  <p class="text-secondary">Your projects and payments in one place.</p>
   <div class="row g-3 my-4 dashboard-shortcuts">
     <div class="col-6 col-lg-4"><a class="dashboard-shortcut-link" href="#my-orders" aria-label="View my orders"><div class="tile h-100 dashboard-shortcut"><div class="small text-secondary">ORDERS</div><h2>{{ orders.count }}</h2><span>View orders <i class="fa-solid fa-arrow-right"></i></span></div></a></div>
     <div class="col-6 col-lg-4"><a class="dashboard-shortcut-link" href="#payment-records" aria-label="View payment records"><div class="tile h-100 dashboard-shortcut"><div class="small text-secondary">PAYMENTS</div><h2>{{ payments.count }}</h2><span>View payments <i class="fa-solid fa-arrow-right"></i></span></div></a></div>
-    <div class="col-12 col-lg-4"><a class="dashboard-shortcut-link" href="#certificates" aria-label="View certificates"><div class="tile h-100 dashboard-shortcut"><div class="small text-secondary">CERTIFICATES</div><h2>{{ certificates.count }}</h2><span>View certificates <i class="fa-solid fa-arrow-right"></i></span></div></a></div>
   </div>
   <div class="d-flex flex-wrap gap-2 mb-4"><a class="btn btn-red" href="/orders/new/">Start a project</a><a class="btn btn-outline-light" href="/accounts/profile/">Edit profile</a></div>
   <div class="dashboard-section" id="my-orders"><div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><h3>My Orders</h3><span class="small text-secondary">Select an order to view its full details</span></div>
@@ -27,30 +26,6 @@
   <div class="dashboard-section mt-5" id="payment-records"><h3>Payment Records</h3>
     {% for payment in payments %}<div class="tile dashboard-record mb-2"><div class="d-flex justify-content-between align-items-start flex-wrap gap-3"><div class="flex-grow-1 min-w-0"><b>{{ payment.order.title }}</b><div class="small text-secondary">{{ payment.order.order_id }} · {{ payment.created_at|date:"d M Y, h:i A" }}</div><div class="mt-1">Amount: ₹{{ payment.amount }} · Method: UPI</div>{% if payment.transaction_id %}<div class="small">UTR: {{ payment.transaction_id }}</div>{% endif %}{% if payment.receipt %}<a class="small" href="{{ payment.receipt.url }}" target="_blank" rel="noopener">View submitted screenshot</a>{% endif %}</div><span class="payment-status payment-status-{{ payment.status }} align-self-start flex-shrink-0">{% if payment.status == 'verified' %}<span class="payment-status-icon" aria-hidden="true">✓</span><span>Verified</span>{% elif payment.status == 'submitted' %}<span>Under review</span>{% elif payment.status == 'failed' %}<span>Failed</span>{% else %}<span>{{ payment.get_status_display }}</span>{% endif %}</span></div><a class="btn btn-red dashboard-order-details mt-2" href="{% url 'orders:detail' payment.order.order_id %}">Open related order <i class="fa-solid fa-arrow-right ms-1"></i></a></div>
     {% empty %}<div class="tile">No payment records yet.</div>{% endfor %}
-  </div>
-  <div class="dashboard-section mt-5" id="certificates"><h3>Certificates</h3>
-    {% for c in certificates %}
-      <div class="tile dashboard-record mb-3">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-          <div class="certificate-preview-trigger" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#certificatePreview{{ c.pk }}" aria-label="Preview certificate for {{ c.recipient_name }}">
-            <img class="certificate-preview-image" src="{% url 'certificates:preview' c.certificate_id %}" alt="Certificate preview for {{ c.recipient_name }}">
-            <div class="small text-secondary text-center mt-2"><i class="fa-solid fa-magnifying-glass-plus"></i> Click to enlarge preview</div>
-          </div>
-          <div class="flex-grow-1">
-            <b>{{ c.project_name }}</b>
-            <div class="small text-secondary">{{ c.recipient_name }} · {{ c.certificate_id }} · {{ c.completion_date|date:"d M Y" }}</div>
-            {% if not c.revoked %}<a class="btn btn-red btn-sm mt-3" href="{% url 'certificates:download' c.certificate_id %}">Download certificate</a>{% if not c.order.review %}<a class="btn btn-red btn-sm mt-3 ms-2" href="{% url 'reviews:create' c.order.order_id %}">Write a review <i class="fa-solid fa-arrow-right ms-1"></i></a>{% endif %}{% else %}<span class="status-chip mt-2">Revoked</span>{% endif %}
-          </div>
-        </div>
-      </div>
-      <div class="modal fade certificate-preview-modal" id="certificatePreview{{ c.pk }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl"><div class="modal-content bg-dark border-secondary">
-          <div class="modal-header border-secondary"><h5 class="modal-title text-white">Certificate Preview</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-          <div class="modal-body p-3 p-md-4 text-center"><img class="certificate-preview-image certificate-preview-image-large" src="{% url 'certificates:preview' c.certificate_id %}" alt="Full certificate preview for {{ c.recipient_name }}"></div>
-          <div class="modal-footer border-secondary">{% if not c.revoked %}<a class="btn btn-red" href="{% url 'certificates:download' c.certificate_id %}">Download certificate PDF</a>{% endif %}<button class="btn btn-outline-light" data-bs-dismiss="modal">Close</button></div>
-        </div></div>
-      </div>
-    {% empty %}<div class="tile">Certificates appear here after your project is completed and payment is verified.</div>{% endfor %}
   </div>
   <div class="dashboard-section mt-5"><h3>Notifications</h3>{% for n in notifications %}<div class="tile mb-2">{{ n.title }} — {{ n.message }}</div>{% empty %}<div class="tile">No new notifications.</div>{% endfor %}</div>
 </div></section>

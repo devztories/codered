@@ -1,0 +1,15 @@
+CODERED INVENTIONS – Customer dashboard and payment navigation update
+
+Implemented in this package:
+- Customer order cards show the order ID/title and are clickable across the card; keyboard Enter/Space is supported.
+- Removed price, order status, stage and tracking from dashboard order cards; tracking and details are on the order detail page.
+- Delivered orders show a Project Delivered state instead of the tracking timeline.
+- QR image is constrained to a centered, contained frame; download and submit buttons use full-width aligned styling.
+- Payment submission redirects to the order detail page; submitted/verified payments cannot reopen the QR payment screen. Payment page responses are marked no-store.
+- Certificate generation reuses existing certificates and redirects to the related order detail page after generation. Certificate form responses are marked no-store.
+- Saving an order as Paid verifies pending/submitted payment records; verifying a payment marks its order Paid.
+- Payment modal uses a solid modal surface rather than the fade transition.
+
+Validation note:
+- Python compileall completed successfully. Django system checks and database-backed tests could not be run in this environment because Django dependencies could not be installed (network unavailable).
+- WebSocket/polling-based no-refresh live updates have not been implemented in this package; current status changes will appear on the next page load. This needs a separate live-update endpoint/client implementation and deployment support.

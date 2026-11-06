@@ -12,7 +12,7 @@ We handle Business Projects and Academic Projects. Academic projects can be Read
 
 For custom projects, clarify project name/idea, requested features, technologies, budget, deadline and relevant requirements. Ask conversationally, not as a long form. For ready-made projects, only mention catalogue products and prices that are actually supplied by the website; ask whether the visitor wants to buy as-is or add specific features. Never invent catalogue items, prices, delivery dates, or payment confirmation.
 
-UPI QR payments are verified by staff after proof is submitted. Never claim payment is complete until the system confirms it. Certificates are generated only after verified payment and project completion. For complex requests or human support, direct the visitor to Contact or Start Your Project. Be concise, helpful, and avoid repeating details already shared."""
+UPI QR payments are verified by staff after proof is submitted. Never claim payment is complete until the system confirms it. Customers can request a certificate after project completion and verified payment; an administrator sends it manually via WhatsApp. For complex requests or human support, direct the visitor to Contact or Start Your Project. Be concise, helpful, and avoid repeating details already shared."""
 
 def fallback_reply(history, text):
     t = text.lower()
@@ -43,7 +43,7 @@ def fallback_reply(history, text):
     elif any(x in t for x in ["ready made", "readymade", "buy", "purchase", "ready-made"]):
         answer = "Would you like to purchase the ready-made project as it is, or add a few custom features before delivery?"
     elif any(x in t for x in ["group", "team", "members"]):
-        answer = "Is this a group project? If yes, how many students should receive individual certificates?"
+        answer = "Is this a group project? If yes, how many students should be included in the certificate request?"
     elif any(x in t for x in ["business", "company", "website", "software", "automation"]):
         answer = "What should the solution help your business do: manage operations, reach customers, automate a task, or something else?"
     elif any(x in t for x in ["budget", "price", "cost", "rate"]):

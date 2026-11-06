@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     "services",
     "orders",
     "payments",
-    "certificates",
     "reviews",
     "chatbot",
     "notifications",

@@ -70,3 +70,26 @@ def order_detail(request, order_id):
         "is_complete": order.stage in {"completed", "delivered"},
         "payment_submitted_popup": request.GET.get("payment_review") == "1",
     })
+
+
+@login_required
+@require_POST
+def request_certificate(request, order_id):
+    """Store a lightweight request only; no certificate file is generated or uploaded."""
+    from django.utils import timezone
+    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    payment_verified = order.payments.filter(status="verified").exists()
+    if order.stage not in {"completed", "delivered"}:
+        messages.warning(request, "Certificate requests are available after project completion.")
+    elif not payment_verified:
+        messages.warning(request, "Your payment must be verified before requesting a certificate.")
+    elif order.certificate_request_status == "sent":
+        messages.info(request, "Your certificate has already been marked as sent by our team.")
+    elif order.certificate_request_status == "requested":
+        messages.info(request, "Your certificate request is already with our admin team.")
+    else:
+        order.certificate_request_status = "requested"
+        order.certificate_requested_at = timezone.now()
+        order.save(update_fields=["certificate_request_status", "certificate_requested_at", "updated_at"])
+        messages.success(request, "Certificate request submitted. Our team will send your certificate via WhatsApp.")
+    return redirect("orders:detail", order_id=order.order_id)

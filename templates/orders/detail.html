@@ -1,5 +1,6 @@
 
 {% extends 'base.html' %}
+
 {% block content %}
 <section class="page-hero">
   <div class="container">
@@ -7,10 +8,17 @@
     <div class="section-label">ORDER {{ order.order_id }}</div>
     <h1>{{ order.title }}</h1>
 
+    <!-- Order status -->
     <div class="d-flex flex-wrap gap-2 my-3">
-      <span class="status-chip">Status: {{ order.get_status_display }}</span>
-      <span class="status-chip">Stage: {{ order.get_stage_display }}</span>
-      <span class="status-chip">Price: ₹{{ order.amount }}</span>
+      <span class="status-chip">
+        Status: {{ order.get_status_display }}
+      </span>
+      <span class="status-chip">
+        Stage: {{ order.get_stage_display }}
+      </span>
+      <span class="status-chip">
+        Price: ₹{{ order.amount }}
+      </span>
       <span class="status-chip">
         Payment:
         {% if payment_verified %}
@@ -23,13 +31,25 @@
       </span>
     </div>
 
+    <!-- Project requirements -->
     {% if order.request %}
     <div class="tile mt-3">
       <h4>Project requirements</h4>
 
-      <p><b>Type:</b> {{ order.request.get_request_type_display }}</p>
-      <p><b>Features:</b> {{ order.request.required_features|default:order.request.customization_features|linebreaksbr }}</p>
-      <p><b>Technologies:</b> {{ order.request.technologies|default:'Not specified' }}</p>
+      <p>
+        <b>Type:</b>
+        {{ order.request.get_request_type_display }}
+      </p>
+
+      <p>
+        <b>Features:</b>
+        {{ order.request.required_features|default:order.request.customization_features|linebreaksbr }}
+      </p>
+
+      <p>
+        <b>Technologies:</b>
+        {{ order.request.technologies|default:'Not specified' }}
+      </p>
 
       <p>
         <b>Budget:</b>
@@ -40,15 +60,26 @@
         {% endif %}
       </p>
 
-      <p><b>Deadline:</b> {{ order.request.deadline|default:'Not specified' }}</p>
+      <p>
+        <b>Deadline:</b>
+        {{ order.request.deadline|default:'Not specified' }}
+      </p>
 
       {% if order.request.academic_team_type == 'group' %}
-        <p><b>Team:</b> Group · {{ order.request.group_size }} members</p>
-        <p><b>Members:</b><br>{{ order.request.group_member_names|linebreaksbr }}</p>
+        <p>
+          <b>Team:</b>
+          Group · {{ order.request.group_size }} members
+        </p>
+
+        <p>
+          <b>Members:</b><br>
+          {{ order.request.group_member_names|linebreaksbr }}
+        </p>
       {% endif %}
     </div>
     {% endif %}
 
+    <!-- Project tracker -->
     {% if order.stage == 'delivered' %}
       <div class="alert alert-success my-4">
         <strong>Project Delivered</strong>
@@ -58,63 +89,102 @@
     {% endif %}
 
     <!-- Order actions -->
-    <div class="d-flex flex-wrap gap-2 mt-4">
+    <div class="order-actions d-flex flex-wrap gap-2 mt-4">
 
       {% if not payment_verified and order.amount > 0 %}
-        <a class="btn btn-red order-action-btn"
-           href="{% url 'payments:pay' order.order_id %}">
+        <a
+          class="btn btn-red order-action-btn"
+          href="{% url 'payments:pay' order.order_id %}">
           Complete Your Payment
         </a>
       {% endif %}
 
+      <!-- Certificate request workflow -->
       {% if is_complete %}
+
         {% if payment_verified %}
-          <a class="btn btn-red order-action-btn"
-             href="{% url 'certificates:generate' order.order_id %}">
-            Generate / View Certificate
-          </a>
+
+          {% if order.certificate_request_status == "sent" %}
+
+            <span class="btn btn-outline-light order-action-btn" aria-disabled="true">
+              Certificate Sent
+            </span>
+
+          {% elif order.certificate_request_status == "requested" %}
+
+            <span class="btn btn-outline-light order-action-btn" aria-disabled="true">
+              Certificate Request Submitted
+            </span>
+
+          {% else %}
+
+            <form
+              method="post"
+              action="{% url 'orders:certificate_request' order.order_id %}"
+              class="w-100">
+
+              {% csrf_token %}
+
+              <button
+                class="btn btn-red order-action-btn"
+                type="submit">
+                Request Certificate
+              </button>
+
+            </form>
+
+          {% endif %}
+
         {% else %}
-          <button class="btn btn-outline-light order-action-btn"
-                  type="button"
-                  data-bs-toggle="modal"
-                  data-bs-target="#paymentRequiredModal">
+
+          <button
+            class="btn btn-outline-light order-action-btn"
+            type="button"
+            data-bs-toggle="modal"
+            data-bs-target="#paymentRequiredModal">
             Certificate
           </button>
+
         {% endif %}
+
       {% endif %}
 
     </div>
 
     <!-- Payment required modal -->
     {% if is_complete and not payment_verified and not payment_submitted %}
-    <div class="modal fade"
-         id="paymentRequiredModal"
-         tabindex="-1"
-         aria-hidden="true">
+
+    <div
+      class="modal fade"
+      id="paymentRequiredModal"
+      tabindex="-1"
+      aria-hidden="true">
 
       <div class="modal-dialog modal-dialog-centered">
+
         <div class="modal-content bg-dark text-white border-secondary">
 
           <div class="modal-header border-secondary">
             <h5 class="modal-title">Complete Your Payment</h5>
 
-            <button type="button"
-                    class="btn-close btn-close-white"
-                    data-bs-dismiss="modal"
-                    aria-label="Close">
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close">
             </button>
           </div>
 
           <div class="modal-body">
             Please complete and submit your UPI payment.
-            Your certificate will be available after the payment
-            is verified by our team.
+            Your certificate request will be available after
+            the payment is verified by our team.
           </div>
 
           <div class="modal-footer border-secondary">
-            <a class="btn btn-red order-action-btn payment-modal-open-btn"
-               href="{% url 'payments:pay' order.order_id %}"
-               role="button">
+            <a
+              class="btn btn-red order-action-btn payment-modal-open-btn"
+              href="{% url 'payments:pay' order.order_id %}">
               Open Payment
             </a>
           </div>
@@ -125,32 +195,37 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        var modalElement = document.getElementById('paymentRequiredModal');
+        const modalElement = document.getElementById('paymentRequiredModal');
 
         if (modalElement && window.bootstrap) {
           bootstrap.Modal.getOrCreateInstance(modalElement).show();
         }
       });
     </script>
+
     {% endif %}
 
     <!-- Payment review modal -->
     {% if is_complete and not payment_verified and payment_submitted %}
-    <div class="modal fade"
-         id="paymentReviewModal"
-         tabindex="-1"
-         aria-hidden="true">
+
+    <div
+      class="modal fade"
+      id="paymentReviewModal"
+      tabindex="-1"
+      aria-hidden="true">
 
       <div class="modal-dialog modal-dialog-centered">
+
         <div class="modal-content bg-dark text-white border-secondary">
 
           <div class="modal-header border-secondary">
             <h5 class="modal-title">Reviewing Your Payment</h5>
 
-            <button type="button"
-                    class="btn-close btn-close-white"
-                    data-bs-dismiss="modal"
-                    aria-label="Close">
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close">
             </button>
           </div>
 
@@ -163,9 +238,10 @@
           </div>
 
           <div class="modal-footer border-secondary">
-            <button class="btn btn-outline-light"
-                    type="button"
-                    data-bs-dismiss="modal">
+            <button
+              class="btn btn-outline-light"
+              type="button"
+              data-bs-dismiss="modal">
               Okay
             </button>
           </div>
@@ -176,22 +252,24 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        var modalElement = document.getElementById('paymentReviewModal');
+        const modalElement = document.getElementById('paymentReviewModal');
 
         if (modalElement && window.bootstrap) {
           bootstrap.Modal.getOrCreateInstance(modalElement).show();
         }
       });
     </script>
+
     {% endif %}
 
+    <!-- Payment warning -->
     {% if order.stage == 'completed' and not payment_verified %}
       <div class="alert alert-warning mt-3">
         Complete your payment before final delivery can be released.
       </div>
     {% endif %}
 
-    <!-- Project tracking -->
+    <!-- Project updates -->
     {% if order.stage != "delivered" %}
       <h3 class="mt-5">Live Project Tracking</h3>
     {% else %}
@@ -200,9 +278,15 @@
 
     {% for u in work_updates %}
       <div class="tile mb-2">
-        <div class="d-flex justify-content-between">
-          <b>{{ u.get_stage_display }} · {{ u.progress_percent }}%</b>
-          <small>{{ u.created_at|date:"d M Y, h:i A" }}</small>
+
+        <div class="d-flex justify-content-between flex-wrap">
+          <b>
+            {{ u.get_stage_display }} · {{ u.progress_percent }}%
+          </b>
+
+          <small>
+            {{ u.created_at|date:"d M Y, h:i A" }}
+          </small>
         </div>
 
         <p class="mb-1">{{ u.message }}</p>
@@ -213,6 +297,7 @@
             {{ u.expected_delivery_date|date:"d M Y" }}
           </small>
         {% endif %}
+
       </div>
     {% endfor %}
 
@@ -241,20 +326,23 @@
 
 <style>
   .order-action-btn {
-    min-width: 190px;
-    min-height: 48px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px 18px !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
   }
 
-  .payment-modal-open-btn {
+  .order-actions form {
     width: 100%;
   }
 
-  #paymentRequiredModal,
-  #paymentReviewModal {
+  .modal {
     z-index: 1060;
   }
 
@@ -268,47 +356,11 @@
     pointer-events: auto !important;
   }
 
-  .modal-footer .order-action-btn {
-    width: 100%;
+  .payment-modal-open-btn {
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
   }
 </style>
+
 {% endblock %}
-
-{% if payment_submitted_popup %}
-<div class="modal fade" id="paymentReviewModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-white border-secondary text-center p-3">
-
-      <div class="modal-body">
-        <div class="mb-3" style="font-size:42px;color:#e0b54b">
-          <i class="fa-regular fa-clock"></i>
-        </div>
-
-        <h4>Reviewing Your Payment</h4>
-
-        <p class="text-secondary mb-0">
-          Your payment proof was received.
-          Our team will verify it and update your payment status here.
-        </p>
-      </div>
-
-      <div class="modal-footer justify-content-center border-secondary">
-        <button class="btn btn-red" data-bs-dismiss="modal">
-          Okay
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const element = document.getElementById('paymentReviewModal');
-
-    if (element && window.bootstrap) {
-      bootstrap.Modal.getOrCreateInstance(element).show();
-    }
-  });
-</script>
-{% endif %}

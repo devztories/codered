@@ -13,13 +13,12 @@ from payments.models import Payment, PaymentSettings
 from accounts.models import User, UserProfile, EmployeeProfile
 from contact.models import ContactMessage, SiteSettings
 from reviews.models import Review
-from certificates.models import Certificate, CertificateDesignSettings
 from services.models import Service
 from chatbot.models import ChatConversation, ChatMessage
 from notifications.models import Notification
 
 
-EMPLOYEE_BLOCKED_MODULES = {"payments", "payment-settings", "site-settings"}
+EMPLOYEE_BLOCKED_MODULES = {"payments", "payment-settings", "site-settings", "certificate-requests"}
 
 def workspace_access_required(view):
     """Allow staff administrators and active employees into the shared workspace."""
@@ -58,8 +57,7 @@ MODULES = {
  'site-settings': {'title':'Contact Settings','subtitle':'Manage WhatsApp, email and phone details shown on Contact Us','model':SiteSettings,'icon':'☎','exclude':('updated_at',)},
  'messages': {'title':'Enquiries','subtitle':'Customer contact messages','model':ContactMessage,'icon':'☏','exclude':('created_at',)},
  'reviews': {'title':'Reviews','subtitle':'Moderate customer feedback','model':Review,'icon':'☆','exclude':('created_at',)},
- 'certificates': {'title':'Certificates','subtitle':'Issue and manage project certificates','model':Certificate,'icon':'▧','exclude':()},
- 'certificate-design': {'title':'Certificate Design Settings','subtitle':'Edit certificate wording, mentor details and signature artwork','model':CertificateDesignSettings,'icon':'✍','exclude':('updated_at',)},
+ 'certificate-requests': {'title':'Certificate Requests','subtitle':'Customer requests awaiting manual WhatsApp delivery','model':Order,'icon':'✉','exclude':()},
  'conversations': {'title':'Chatbot Conversations','subtitle':'Read customer conversations and support requests','model':ChatConversation,'icon':'✦','exclude':('session_key','created_at','updated_at')},
 }
 
@@ -81,9 +79,9 @@ def admin_module(request,module):
  ensure_module_access(request, module)
  cfg=MODULES.get(module)
  if not cfg: raise Http404
- if module == 'certificate-design':
-  CertificateDesignSettings.current()
  qs=cfg['model'].objects.all().order_by('-pk')[:250]
+ if module == 'certificate-requests':
+  qs=Order.objects.filter(certificate_request_status__in=['requested','sent']).select_related('user').order_by('-certificate_requested_at','-pk')[:250]
  rows=[]
  for obj in qs:
   title=str(obj)
@@ -98,15 +96,17 @@ def admin_module(request,module):
   elif module=='employees': meta=f"{obj.designation or 'Employee'} · {obj.department or 'General'}"; status='Active' if obj.is_active and obj.user.is_active else 'Inactive'; value=f"{obj.assignments.filter(is_active=True).count()} active projects"
   elif module=='messages': meta=f'{obj.name} · {obj.email}'; status='Resolved' if obj.is_resolved else 'Open'
   elif module=='reviews': meta=str(obj.user); status='Approved' if obj.is_approved else 'Needs review'
-  elif module=='certificates': meta=obj.project_name; status='Revoked' if obj.revoked else 'Active'
+  elif module=='certificate-requests': meta=f'{obj.user} · {obj.order_id}'; status=obj.get_certificate_request_status_display(); value=obj.certificate_requested_at.strftime('%d %b %Y %H:%M') if obj.certificate_requested_at else '—'
   elif module=='categories': meta=obj.slug; status='Active' if obj.is_active else 'Hidden'; value=f'{obj.projects.count()} projects'
   elif module=='conversations': meta=str(obj.user or 'Guest'); status='Human support' if obj.mode=='human' else 'AI assistant'; value=f'{obj.messages.count()} messages'
   order_pk = None
   if module == 'requests':
    try: order_pk = obj.order.pk
    except Exception: order_pk = None
+  elif module == 'certificate-requests':
+   order_pk = obj.pk
   rows.append({'pk':obj.pk,'title':title,'meta':meta,'status':status,'value':value,'order_pk':order_pk})
- return render(request,'dashboard/admin_module.html',{'active':module,'module':cfg,'module_key':module,'rows':rows,'total':cfg['model'].objects.count(),'add_url':reverse('control:add',args=[module]),'can_add':module not in {'requests','orders','payments','messages','reviews','conversations','certificate-design'},'is_employee_workspace':request.is_employee_workspace})
+ return render(request,'dashboard/admin_module.html',{'active':module,'module':cfg,'module_key':module,'rows':rows,'total':cfg['model'].objects.count(),'add_url':reverse('control:add',args=[module]),'can_add':module not in {'requests','orders','payments','messages','reviews','conversations','certificate-requests'},'is_employee_workspace':request.is_employee_workspace})
 
 @workspace_access_required
 def admin_edit(request,module,pk=None):
@@ -114,10 +114,7 @@ def admin_edit(request,module,pk=None):
  cfg=MODULES.get(module)
  if not cfg: raise Http404
  Model=cfg['model']
- if module == 'certificate-design':
-  obj=CertificateDesignSettings.current()
- else:
-  obj=get_object_or_404(Model,pk=pk) if pk else None
+ obj=get_object_or_404(Model,pk=pk) if pk else None
  exclude=list(cfg.get('exclude',()))
  if module=='users':
   exclude += ['is_superuser','is_staff']
@@ -133,9 +130,26 @@ def admin_edit(request,module,pk=None):
   Form = EmployeeProfileForm
  else:
   Form=modelform_factory(Model,exclude=tuple(exclude))
+ if module == 'certificate-requests':
+  class CertificateRequestForm(ModelForm):
+   class Meta:
+    model = Order
+    fields = ('certificate_request_status',)
+   def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['certificate_request_status'].label = 'Certificate delivery status'
+  Form = CertificateRequestForm
  form=Form(request.POST or None,request.FILES or None,instance=obj)
  if request.method=='POST' and form.is_valid():
   saved=form.save()
+  if module == 'certificate-requests':
+   from django.utils import timezone
+   if saved.certificate_request_status == 'sent' and not saved.certificate_sent_at:
+    saved.certificate_sent_at = timezone.now()
+    saved.save(update_fields=['certificate_sent_at', 'updated_at'])
+   elif saved.certificate_request_status != 'sent' and saved.certificate_sent_at:
+    saved.certificate_sent_at = None
+    saved.save(update_fields=['certificate_sent_at', 'updated_at'])
   if module=='users' and not obj and not saved.has_usable_password(): saved.set_unusable_password(); saved.save()
   messages.success(request,f'{cfg["title"][:-1] if cfg["title"].endswith("s") else cfg["title"]} saved successfully.')
   return redirect('control:module',module=module)
@@ -196,7 +210,6 @@ def admin_order_detail(request, pk):
     return render(request, 'dashboard/admin_order_detail.html', {
         'active': 'orders', 'order': order,
         'payments': order.payments.select_related('user', 'verified_by').order_by('-created_at') if not request.is_employee_workspace else [],
-        'certificates': order.certificates.order_by('-created_at'),
         'updates': order.updates.select_related('created_by').order_by('-created_at'),
         'quotations': order.quotations.order_by('-created_at'),
         'employees': EmployeeProfile.objects.filter(is_active=True, user__is_active=True).select_related('user'),

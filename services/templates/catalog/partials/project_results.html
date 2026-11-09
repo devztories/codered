@@ -1,0 +1,32 @@
+{% if page_obj.object_list %}
+  <div class="project-catalogue" id="projectCatalogue">
+    <div class="project-catalogue-topline">
+      <span>{{ project_count }} projects · Showing {{ page_obj.start_index }}–{{ page_obj.end_index }}</span>
+      <span class="project-catalogue-hint">Swipe on mobile to browse cards</span>
+    </div>
+    <div class="project-row-wrap">
+      <div class="project-catalogue-grid project-grid-layout" data-project-row tabindex="0" aria-label="Project cards">
+      {% for p in page_obj %}
+        <a class="project-card" href="{% url 'catalog:detail' p.slug %}">
+          {% if p.cover_image %}<img src="{{ p.cover_image.url }}" alt="{{ p.name }}" loading="lazy">{% else %}<div class="project-placeholder"><i class="fa-solid fa-laptop-code"></i></div>{% endif %}
+          <div class="project-card-content">
+            <span class="project-category-label">{{ p.category.name }}</span>
+            <h5>{{ p.name }}</h5>
+            <p>{{ p.short_description }}</p>
+            <div class="project-price">₹{{ p.price|floatformat:0 }}</div>
+          </div>
+        </a>
+      {% endfor %}
+      </div>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="project-pagination" aria-label="Project pages">
+        {% if page_obj.has_previous %}<a class="btn btn-outline-light" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.previous_page_number }}" data-project-page>Previous</a>{% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a class="btn btn-red" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.next_page_number }}" data-project-page>Next</a>{% endif %}
+      </nav>
+    {% endif %}
+  </div>
+{% else %}
+  <div class="empty-projects"><i class="fa-solid fa-folder-open"></i><h3>No projects found</h3><p>Try another search or category.</p></div>
+{% endif %}

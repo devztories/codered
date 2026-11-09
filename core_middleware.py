@@ -1,3 +1,4 @@
+
 from django.shortcuts import render
 
 
@@ -9,16 +10,22 @@ class ServiceUnavailablePageMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        if response.status_code == 503:
-            return render(request, "errors/503.html", status=503)
-        return response
 
+        if response.status_code == 503:
+            return render(
+                request,
+                "errors/503.html",
+                status=503
+            )
+
+        return response
 
 
 class NoStoreHtmlMiddleware:
     """
-    Prevent browsers from restoring stale HTML forms from cache after
-    successful submissions and redirects. Static/media assets are untouched.
+    Prevent browsers from restoring stale HTML forms from cache
+    after successful submissions and redirects.
+    Static and media assets are untouched.
     """
 
     def __init__(self, get_response):
@@ -28,6 +35,7 @@ class NoStoreHtmlMiddleware:
         response = self.get_response(request)
 
         content_type = response.get("Content-Type", "").lower()
+
         if content_type.startswith("text/html"):
             response["Cache-Control"] = (
                 "private, no-store, no-cache, must-revalidate, max-age=0"

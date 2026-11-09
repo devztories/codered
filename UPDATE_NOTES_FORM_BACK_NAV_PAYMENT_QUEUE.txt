@@ -1,32 +1,47 @@
+
 CODERED INVENTIONS - FORM NAVIGATION AND PAYMENT QUEUE UPDATE
 
 Changes:
+
 1. Added NoStoreHtmlMiddleware in core_middleware.py.
-   HTML responses now send private/no-store/no-cache headers so browsers
-   do not restore stale submitted forms from their page cache. Static files
-   are not affected.
+   HTML responses now send private/no-store/no-cache headers to reduce
+   stale pages being restored from browser cache.
+
 2. Registered the middleware in config/settings.py.
-3. Updated accounts.profile to use POST -> Redirect -> GET after a successful
-   profile update.
-4. Existing customer submission views already use redirects after successful
-   POST submissions:
+
+3. Updated accounts.profile to use POST -> Redirect -> GET
+   after successful profile updates.
+
+4. Customer submission views use redirects after successful POST:
    - accounts.register and accounts.login_view
    - contact.submit
-   - orders.request_project and orders.request_certificate
+   - orders.request_project
+   - orders.request_certificate
    - reviews.create
    - payments.pay
-5. Existing admin create/update/delete and employee progress actions redirect
-   after successful POST operations.
 
-Expected customer behaviour:
-- After a successful submission, the browser lands on a result/detail page.
-- Refreshing that page does not resubmit the POST.
-- Browser Back should not restore a cached HTML form; the browser may still
-  navigate to the form URL, where it will be freshly requested from the server.
-- Payment proof submission redirects to Order Detail; the payment view blocks
-  reopening the QR form once proof is submitted or verified.
+5. Payment proof submission redirects to Order Detail.
+
+6. Existing submitted or verified payments cannot reopen the QR payment form.
+
+7. Order detail uses payment_submitted to show the payment queue state.
+
+8. Existing admin create/update/delete and employee progress
+   actions redirect after successful POST operations.
+
+Expected Behaviour:
+
+- After successful form submission, users are redirected to
+  the appropriate result or detail page.
+- Refreshing the result page does not resubmit the POST request.
+- Browser Back should not restore a cached submitted HTML form.
+- Payment proof submission redirects to Order Detail.
+- Invalid form submissions display validation errors so users
+  can correct their input.
 
 Important:
-- Invalid form submissions intentionally render the form with validation
-  errors; they are not redirected, so users can correct their input.
+
+- Global cache headers alone do not prevent duplicate submissions.
+- Invalid form submissions intentionally render the form.
+- Static and media assets are unaffected.
 - No database schema changes or migrations are required.

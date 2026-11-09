@@ -1,0 +1,19 @@
+CODE RED INVENTIONS – NOTIFICATION SYSTEM UPDATE
+
+Included:
+- Customer and staff in-app notification feed.
+- Notification read and mark-all-read endpoints.
+- Eight-second browser polling in public and staff dashboard navigation.
+- Signals for customer registration, project requests, orders, order status/stage, certificate status, payments, order messages, visible work updates, enquiries, reviews and chatbot messages.
+- Optional Meta WhatsApp Cloud API template sender.
+- Customer WhatsApp opt-in field and migration 0003.
+- .env.example and NOTIFICATIONS_SETUP.md.
+
+Deployment:
+1. Deploy the complete project.
+2. Run: python manage.py migrate
+3. Add WhatsApp environment variables only if WhatsApp integration is being enabled.
+4. Create and approve a WhatsApp template with three BODY placeholders in this order: title, message, URL.
+5. Customers must opt in through their profile before customer WhatsApp alerts can be sent.
+
+The browser notification feed uses polling every eight seconds; it does not require Redis, Channels, or a WebSocket server.

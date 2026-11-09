@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "payments",
     "reviews",
     "chatbot",
-    "notifications",
+    "notifications.apps.NotificationsConfig",
     "contact",
     "dashboard",
 ]

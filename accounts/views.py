@@ -13,7 +13,7 @@ from .models import UserProfile
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ('address', 'city', 'state', 'avatar')
+        fields = ('address', 'city', 'state', 'avatar', 'whatsapp_notifications_enabled')
 
 
 def register(request):

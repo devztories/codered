@@ -209,3 +209,39 @@
     }
   });
 })();
+
+// Customer forms: block double submission and never show a stale form after Back/Forward.
+(() => {
+  document.addEventListener('submit', event => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    if ((form.method || '').toLowerCase() !== 'post') return;
+    if (form.id === 'chatForm' || form.hasAttribute('data-allow-resubmit')) return;
+    if (form.dataset.submitting === '1') { event.preventDefault(); return; }
+    form.dataset.submitting = '1';
+    form.querySelectorAll('button[type="submit"], button:not([type]), input[type="submit"]').forEach(btn => {
+      setTimeout(() => { btn.disabled = true; btn.classList.add('disabled'); }, 0);
+    });
+  }, true);
+
+  const resetFormsState = () => {
+    document.querySelectorAll('form[method="post"]:not(#chatForm)').forEach(form => {
+      delete form.dataset.submitting;
+      form.querySelectorAll('button[disabled], input[type="submit"][disabled]').forEach(btn => {
+        btn.disabled = false; btn.classList.remove('disabled');
+      });
+    });
+  };
+
+  window.addEventListener('pageshow', event => {
+    const nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || null;
+    const fromHistory = event.persisted || (nav && nav.type === 'back_forward');
+    if (fromHistory && document.querySelector('form[method="post"]:not(#chatForm)')) {
+      // Page came from the browser history: fetch a fresh copy from the server
+      // (payment/login pages then redirect when they are no longer valid).
+      window.location.reload();
+      return;
+    }
+    resetFormsState();
+  });
+})();

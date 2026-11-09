@@ -62,9 +62,9 @@
       </div>
       {% if page_obj.paginator.num_pages > 1 %}
         <nav class="project-pagination" aria-label="Project pages">
-          {% if page_obj.has_previous %}<a class="btn btn-outline-light" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.previous_page_number }}"><i class="fa-solid fa-arrow-left me-2"></i>Previous</a>{% endif %}
+          {% if page_obj.has_previous %}<a class="btn btn-outline-light" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
           <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-          {% if page_obj.has_next %}<a class="btn btn-red" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.next_page_number }}">Next <i class="fa-solid fa-arrow-right ms-2"></i></a>{% endif %}
+          {% if page_obj.has_next %}<a class="btn btn-red" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
         </nav>
       {% endif %}
     </div>

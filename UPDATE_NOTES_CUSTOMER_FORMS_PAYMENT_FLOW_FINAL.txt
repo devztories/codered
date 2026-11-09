@@ -1,0 +1,22 @@
+CODERED INVENTIONS - CUSTOMER FORMS & PAYMENT FLOW (FINAL)
+
+Verified end-to-end with automated tests (tests/test_customer_flows.py) - 11 tests pass.
+
+Customer forms
+- Project request, contact, review, profile, register/login all save to DB and redirect (POST -> Redirect -> GET).
+- Requests appear in the admin panel (Project Requests, Orders, Enquiries, Payments).
+- Duplicate protection: repeated POST of the same project request (30 s window) goes to the existing order;
+  "Buy now" re-uses the unpaid order instead of creating a new one.
+- site.js: submit buttons disable after first click; pages restored from browser history (Back/Forward)
+  are reloaded from the server, and HTML is sent with no-store headers (NoStoreHtmlMiddleware).
+- Logged-in users opening Login/Register are redirected to their dashboard.
+
+Payment flow
+- QR page requires BOTH screenshot and transaction ID (switch: REQUIRE_BOTH_PROOFS in payments/views.py).
+- Submit -> redirect to Order Detail. Order row is locked in a transaction so double clicks cannot create two payments.
+- Re-opening the QR page after a submitted/verified payment redirects to Order Detail. Zero-amount orders also redirect.
+- Order Detail: "Your Payment in Queue" (status chip "In queue") until admin verifies; after verification the
+  payment button disappears and status shows Verified. If admin rejects, a notice is shown and the customer can resubmit.
+- Admin: verifying a payment records who verified it.
+
+No model changes / no migrations. Existing UI and admin untouched.

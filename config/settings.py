@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     "payments",
     "reviews",
     "chatbot",
-    "notifications",
+    "notifications.apps.NotificationsConfig",
     "contact",
     "dashboard",
 ]
@@ -68,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core_middleware.ServiceUnavailablePageMiddleware",
+    "core_middleware.NoStoreHtmlMiddleware",
 ]
 
 # --------------------------------------------------
@@ -84,6 +85,8 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "notifications.context_processors.push_config",
+                "django.template.context_processors.csrf",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core_context.context",

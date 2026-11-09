@@ -6,6 +6,6 @@ db.sqlite3
 media/
 staticfiles/
 .pytest_cache/
-
+private_key.pem
 certs/
 *.pem

@@ -1,4 +1,7 @@
 from django.contrib import messages
+from django.db import transaction
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -24,14 +27,24 @@ def request_project(request):
                 initial["request_type"] = "academic_custom" if selected_project.project_type == "academic" else "business"
     form = ProjectRequestForm(request.POST or None, request.FILES or None, initial=initial if request.method == "GET" else None)
     if request.method == "POST" and form.is_valid():
-        project_request = form.save(commit=False)
-        project_request.user = request.user
-        project_request.save()
-        order_type = "academic_custom" if project_request.request_type in {"academic_custom", "ready_custom"} else "business"
-        order = Order.objects.create(
-            user=request.user, request=project_request, project=project_request.project, title=project_request.title,
-            amount=0, order_type=order_type, status="under_review",
-        )
+        # Double-click / duplicate POST guard: the same customer submitting the same
+        # title within a short window is sent to the order that was already created.
+        duplicate = Order.objects.filter(
+            user=request.user, request__isnull=False, title=form.cleaned_data["title"],
+            request__request_type=form.cleaned_data["request_type"],
+            created_at__gte=timezone.now() - timedelta(seconds=30),
+        ).order_by("-created_at").first()
+        if duplicate:
+            return redirect("orders:detail", order_id=duplicate.order_id)
+        with transaction.atomic():
+            project_request = form.save(commit=False)
+            project_request.user = request.user
+            project_request.save()
+            order_type = "academic_custom" if project_request.request_type in {"academic_custom", "ready_custom"} else "business"
+            order = Order.objects.create(
+                user=request.user, request=project_request, project=project_request.project, title=project_request.title,
+                amount=0, order_type=order_type, status="under_review",
+            )
         messages.success(request, "Your request was submitted. You can track it from your dashboard.")
         return redirect("orders:detail", order_id=order.order_id)
     project_options = [
@@ -49,10 +62,15 @@ def request_project(request):
 @require_POST
 def buy_project(request, slug):
     project = get_object_or_404(Project, slug=slug, project_type="academic", is_ready_made=True, is_published=True)
-    order = Order.objects.create(
-        user=request.user, project=project, title=project.name, amount=project.price,
-        order_type="academic", status="awaiting_payment",
-    )
+    # Re-use an unpaid order for the same project instead of creating duplicates on repeated clicks.
+    order = Order.objects.filter(
+        user=request.user, project=project, order_type="academic", status="awaiting_payment",
+    ).exclude(payments__status__in=["submitted", "verified"]).order_by("-created_at").first()
+    if order is None:
+        order = Order.objects.create(
+            user=request.user, project=project, title=project.name, amount=project.price,
+            order_type="academic", status="awaiting_payment",
+        )
     messages.success(request, f'{project.name} added to your orders. Complete the UPI payment to confirm your purchase.')
     return redirect("payments:pay", order_id=order.order_id)
 
@@ -62,11 +80,18 @@ def order_detail(request, order_id):
     order = get_object_or_404(Order, order_id=order_id, user=request.user)
     payment_verified = order.payments.filter(status="verified").exists()
     payment_submitted = order.payments.filter(status="submitted").exists()
+    # Latest proof was rejected by admin and nothing newer is waiting: customer may submit again.
+    latest_payment = order.payments.order_by("-created_at", "-pk").first()
+    payment_rejected = bool(
+        latest_payment and latest_payment.status == "failed"
+        and not payment_verified and not payment_submitted
+    )
     return render(request, "orders/detail.html", {
         "order": order,
         "work_updates": order.work_updates.filter(is_customer_visible=True).select_related("employee__user"),
         "payment_verified": payment_verified,
         "payment_submitted": payment_submitted,
+        "payment_rejected": payment_rejected,
         "is_complete": order.stage in {"completed", "delivered"},
         "payment_submitted_popup": request.GET.get("payment_review") == "1",
     })

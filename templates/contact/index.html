@@ -3,7 +3,7 @@
 {% block content %}
 <section class="project-request-page"><div class="container project-request-shell" style="max-width:900px">
   <div class="request-heading"><div class="section-label">LET'S CONNECT</div><h1>Tell us about <span>your idea.</span></h1><p>Share a few details. Our team will get back to you.</p></div>
-  <div class="row g-4"><div class="col-lg-8"><form method="post" class="project-request-form">{% csrf_token %}
+  <div class="row g-4"><div class="col-lg-8"><form method="post" class="project-request-form skip-back-after-submit">{% csrf_token %}
     {% for field in form %}<div class="request-field mb-3"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
     <div class="request-submit-row"><button class="btn btn-red btn-lg" type="submit">Send enquiry</button></div>
   </form></div>

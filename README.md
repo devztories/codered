@@ -155,3 +155,8 @@ To create an administrator locally:
 ```bash
 python manage.py createsuperuser
 ```
+
+
+## Notifications
+
+See [NOTIFICATIONS_SETUP.md](NOTIFICATIONS_SETUP.md) for the customer/admin website notification system and WhatsApp Cloud API setup.

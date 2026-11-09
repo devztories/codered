@@ -1,0 +1,10 @@
+{
+  "name": "CodeRed Inventions",
+  "short_name": "CodeRed",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#11131a",
+  "theme_color": "#11131a",
+  "description": "CodeRed Inventions customer portal"
+}

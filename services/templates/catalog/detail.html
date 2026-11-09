@@ -13,7 +13,7 @@
     {% if project.project_type == 'academic' and project.is_ready_made and project.is_published %}
       {% if user.is_authenticated %}<form method="post" action="{% url 'orders:buy' project.slug %}">{% csrf_token %}<button class="btn btn-red" type="submit">Buy now · ₹{{ project.price|floatformat:0 }}</button></form>{% else %}<a class="btn btn-red" href="{% url 'accounts:login' %}?next={% url 'catalog:detail' project.slug %}">Login to buy · ₹{{ project.price|floatformat:0 }}</a>{% endif %}
       {% if project.allow_feature_customization %}<a class="btn btn-outline-light" href="{% url 'orders:request' %}?project={{ project.pk }}">Add features / Customize</a>{% endif %}
-    {% else %}<a class="btn btn-red" href="{% url 'orders:request' %}?type={% if project.project_type == 'academic' %}academic_custom{% else %}business{% endif %}&project={{ project.pk }}">Request this project</a>{% endif %}
+    {% else %}<a class="btn btn-red" href="{% url 'orders:request' %}?type={% if project.project_type == 'academic' %}academic_custom{% else %}business{% endif %}&project={{ project.pk }}">Request project</a>{% endif %}
     <a class="btn btn-outline-light" href="{% url 'catalog:projects' %}?type={{ project.project_type }}">Back to projects</a>
   </div>
 </div></section>

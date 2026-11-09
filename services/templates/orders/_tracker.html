@@ -1,3 +1,9 @@
+{% if order.status == 'cancelled' %}
+<div class="project-tracker project-tracker-cancelled" aria-label="Order tracking: Cancelled">
+  <div class="tracker-heading"><div><span class="tracker-kicker">ORDER TRACKING</span><h4>Project journey</h4></div><span class="tracker-current">Cancelled</span></div>
+  <div class="tracker-cancelled-message"><i class="fa-solid fa-circle-xmark" aria-hidden="true"></i><span>This order has been cancelled.</span></div>
+</div>
+{% else %}
 <div class="project-tracker" aria-label="Project progress: {{ order.get_stage_display }}">
   <div class="tracker-heading"><div><span class="tracker-kicker">LIVE PROJECT TRACKING</span><h4>Project journey</h4></div><span class="tracker-current">{{ order.get_stage_display }}</span></div>
   <div class="tracker-track" style="--track-progress: {% if order.stage == 'discussed' %}0{% elif order.stage == 'started' %}33.333{% elif order.stage == 'completed' %}66.666{% else %}100{% endif %}%">
@@ -8,3 +14,4 @@
     <div class="tracker-step {% if order.stage == 'delivered' %}is-done is-current{% endif %}"><span class="tracker-node">{% if order.stage == 'delivered' %}✓{% else %}4{% endif %}</span><b>Delivered</b><small>Ready for you</small></div>
   </div>
 </div>
+{% endif %}

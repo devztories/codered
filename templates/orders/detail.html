@@ -24,7 +24,7 @@
         {% if payment_verified %}
           Verified
         {% elif payment_submitted %}
-          Under review
+          In queue
         {% else %}
           Pending
         {% endif %}
@@ -86,6 +86,11 @@
             Your Payment in Queue
           </span>
         {% else %}
+          {% if payment_rejected %}
+            <p class="alert alert-warning w-100 mb-2">
+              Your last payment proof could not be verified. Please submit it again.
+            </p>
+          {% endif %}
           <a
             class="btn btn-red order-action-btn"
             href="{% url 'payments:pay' order.order_id %}">

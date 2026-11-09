@@ -9,11 +9,16 @@ from django import forms
 class ProfileForm(forms.ModelForm):
  class Meta: model=UserProfile; fields=('address','city','state','avatar')
 def register(request):
+ if request.user.is_authenticated: return redirect('dashboard:home')
  form=RegisterForm(request.POST or None)
  if request.method=='POST' and form.is_valid():
   u=form.save(); login(request,u,backend='accounts.backends.EmailOrPhoneBackend'); return redirect('dashboard:home')
  return render(request,'accounts/form.html',{'form':form,'title':'Create your account'})
 def login_view(request):
+ if request.user.is_authenticated:
+  from .models import EmployeeProfile
+  if request.user.is_staff or EmployeeProfile.objects.filter(user=request.user, is_active=True, user__is_active=True).exists(): return redirect('/admin/')
+  return redirect('dashboard:home')
  form=LoginForm(request,data=request.POST or None)
  if request.method=='POST' and form.is_valid():
   user=form.get_user(); login(request,user)
@@ -27,6 +32,20 @@ def logout_view(request):
  return redirect('home')
 @login_required
 def profile(request):
- p,_=UserProfile.objects.get_or_create(user=request.user); form=ProfileForm(request.POST or None,request.FILES or None,instance=p)
- if request.method=='POST' and form.is_valid(): form.save(); messages.success(request,'Profile updated.')
- return render(request,'accounts/form.html',{'form':form,'title':'My profile'})
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    form = ProfileForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=profile,
+    )
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Profile updated.")
+        return redirect("dashboard:home")
+
+    return render(
+        request,
+        "accounts/form.html",
+        {"form": form, "title": "My profile", "skip_back_after_submit": True},
+    )

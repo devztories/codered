@@ -43,7 +43,7 @@
     <div class="project-catalogue" id="projectCatalogue">
       <div class="project-catalogue-topline">
         <span>{{ project_count }} projects · 10 per page</span>
-        <span>Swipe left or right to browse one project at a time</span>
+        <span>Swipe left or right to browse projects</span>
       </div>
       <div class="project-row-wrap">
         <div class="project-catalogue-grid" data-project-row tabindex="0" aria-label="Swipe horizontally to browse projects">
@@ -51,10 +51,10 @@
           <a class="project-card" href="{% url 'catalog:detail' p.slug %}">
             {% if p.cover_image %}<img src="{{ p.cover_image.url }}" alt="{{ p.name }}" loading="lazy">{% else %}<div class="project-placeholder"><i class="fa-solid fa-laptop-code"></i></div>{% endif %}
             <div class="project-card-content">
-              <div class="project-meta"><small>{{ p.get_project_type_display }} · {{ p.category.name }}</small><span class="project-status {% if p.is_published %}status-published{% else %}status-progress{% endif %}">{% if p.is_published %}Available{% else %}In progress{% endif %}</span></div>
-              <h5>{{ p.name }}</h5><p>{{ p.short_description }}</p>
-              {% if p.project_type == 'academic' and p.is_ready_made %}<div class="project-price">₹{{ p.price|floatformat:0 }} <small>Ready-made project</small></div>{% elif p.price %}<div class="project-price">From ₹{{ p.price|floatformat:0 }}</div>{% endif %}
-              <span class="project-card-action">View project <i class="fa-solid fa-arrow-right"></i></span>
+              <span class="project-category-label">{{ p.category.name }}</span>
+              <h5>{{ p.name }}</h5>
+              <p>{{ p.short_description }}</p>
+              <div class="project-price">₹{{ p.price|floatformat:0 }}</div>
             </div>
           </a>
         {% endfor %}
@@ -62,9 +62,9 @@
       </div>
       {% if page_obj.paginator.num_pages > 1 %}
         <nav class="project-pagination" aria-label="Project pages">
-          {% if page_obj.has_previous %}<a class="btn btn-outline-light" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.previous_page_number }}"><i class="fa-solid fa-arrow-left me-2"></i>Previous</a>{% endif %}
+          {% if page_obj.has_previous %}<a class="btn btn-outline-light" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
           <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-          {% if page_obj.has_next %}<a class="btn btn-red" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.next_page_number }}">Next <i class="fa-solid fa-arrow-right ms-2"></i></a>{% endif %}
+          {% if page_obj.has_next %}<a class="btn btn-red" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
         </nav>
       {% endif %}
     </div>

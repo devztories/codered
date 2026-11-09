@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import FileResponse, Http404
+from django.db import transaction
 from django.views.decorators.http import require_http_methods
 
 from PIL import Image, UnidentifiedImageError
@@ -13,6 +14,10 @@ from .models import Payment, PaymentSettings
 
 
 MAX_RECEIPT_SIZE = 5 * 1024 * 1024
+
+# Customer must give BOTH the payment screenshot and the transaction ID.
+# Set to False to accept either one.
+REQUIRE_BOTH_PROOFS = True
 
 ALLOWED_RECEIPT_TYPES = {
     "image/jpeg",
@@ -35,6 +40,17 @@ def pay(request, order_id):
         messages.info(
             request,
             "This order is already marked as paid."
+        )
+        return redirect(
+            "orders:detail",
+            order_id=order.order_id
+        )
+
+    # Nothing to pay (e.g. quotation not issued yet).
+    if not order.amount or order.amount <= 0:
+        messages.info(
+            request,
+            "Payment is not required for this order yet."
         )
         return redirect(
             "orders:detail",
@@ -69,7 +85,14 @@ def pay(request, order_id):
         has_receipt = bool(receipt)
         has_utr = bool(transaction_id)
 
-        if not has_receipt and not has_utr:
+        if REQUIRE_BOTH_PROOFS and not (has_receipt and has_utr):
+
+            messages.error(
+                request,
+                "Upload the payment screenshot and enter the UPI transaction ID to continue."
+            )
+
+        elif not has_receipt and not has_utr:
 
             messages.error(
                 request,
@@ -103,21 +126,34 @@ def pay(request, order_id):
 
         else:
 
-            # Save payment proof as submitted.
-            Payment.objects.create(
-                order=order,
-                user=request.user,
-                amount=order.amount,
-                method="upi",
-                status="submitted",
-                receipt=receipt,
-                transaction_id=transaction_id,
-            )
+            # Save payment proof as submitted. The order row is locked so that a
+            # double click / two tabs cannot create two payment submissions.
+            with transaction.atomic():
+                locked_order = Order.objects.select_for_update().get(pk=order.pk)
+                already = locked_order.payments.filter(
+                    status__in=["submitted", "verified"]
+                ).exists()
+                if not already:
+                    Payment.objects.create(
+                        order=locked_order,
+                        user=request.user,
+                        amount=locked_order.amount,
+                        method="upi",
+                        status="submitted",
+                        receipt=receipt,
+                        transaction_id=transaction_id,
+                    )
 
-            messages.success(
-                request,
-                "Your payment proof has been submitted successfully. Your payment is now in queue for verification."
-            )
+            if already:
+                messages.info(
+                    request,
+                    "Your payment is already in queue. Our team will review it."
+                )
+            else:
+                messages.success(
+                    request,
+                    "Your payment proof has been submitted successfully. Your payment is now in queue for verification."
+                )
 
             # Redirect directly to order detail page.
             return redirect(

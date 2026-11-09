@@ -142,6 +142,8 @@ def admin_edit(request,module,pk=None):
  form=Form(request.POST or None,request.FILES or None,instance=obj)
  if request.method=='POST' and form.is_valid():
   saved=form.save()
+  if module=='payments' and saved.status=='verified' and not saved.verified_by_id:
+   saved.verified_by=request.user; saved.save(update_fields=['verified_by'])
   if module == 'certificate-requests':
    from django.utils import timezone
    if saved.certificate_request_status == 'sent' and not saved.certificate_sent_at:

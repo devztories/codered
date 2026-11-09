@@ -3,33 +3,31 @@
 {% block content %}
 <section class="page-hero customer-dashboard"><div class="container">
   <div class="section-label">CUSTOMER PORTAL</div><h1>My <span>Dashboard</span></h1>
-  <p class="text-secondary">Your projects and payments in one place.</p>
+  <p class="text-secondary">Your projects, payments and certificates in one place.</p>
   <div class="row g-3 my-4 dashboard-shortcuts">
-    <div class="col-6 col-lg-4"><a class="dashboard-shortcut-link" href="#my-orders" aria-label="View my orders"><div class="tile h-100 dashboard-shortcut"><div class="small text-secondary">ORDERS</div><h2>{{ orders.count }}</h2><span>View orders <i class="fa-solid fa-arrow-right"></i></span></div></a></div>
-    <div class="col-6 col-lg-4"><a class="dashboard-shortcut-link" href="#payment-records" aria-label="View payment records"><div class="tile h-100 dashboard-shortcut"><div class="small text-secondary">PAYMENTS</div><h2>{{ payments.count }}</h2><span>View payments <i class="fa-solid fa-arrow-right"></i></span></div></a></div>
+    <div class="col-6 col-lg-4"><a class="dashboard-shortcut-link" href="#my-orders" aria-label="View my orders"><div class="tile h-100 dashboard-shortcut"><div class="small text-secondary">ORDERS</div><h2>{{ orders.count }}</h2><span>View orders</span></div></a></div>
+    <div class="col-6 col-lg-4"><a class="dashboard-shortcut-link" href="#payment-records" aria-label="View payment records"><div class="tile h-100 dashboard-shortcut"><div class="small text-secondary">PAYMENTS</div><h2>{{ payments.count }}</h2><span>View payments</span></div></a></div>
   </div>
-  <div class="d-flex flex-wrap gap-2 mb-4"><a class="btn btn-red" href="/orders/new/">Start a project</a><a class="btn btn-outline-light" href="/accounts/profile/">Edit profile</a></div>
+  <div class="d-flex flex-wrap gap-2 mb-4 dashboard-primary-actions"><a class="btn btn-red" href="/orders/new/">Start a project</a><a class="btn btn-outline-light" href="/accounts/profile/">Edit profile</a></div>
   <div class="dashboard-section" id="my-orders"><div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><h3>My Orders</h3><span class="small text-secondary">Select an order to view its full details</span></div>
   {% for o in orders %}
-    <article class="tile dashboard-record mb-3">
-      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <article class="tile dashboard-record mb-3 order-card-clickable" role="link" tabindex="0" data-order-url="{% url 'orders:detail' o.order_id %}" onclick="if(!event.target.closest('a,button,input,select,textarea')) window.location.href=this.dataset.orderUrl" onkeydown="if((event.key==='Enter'||event.key===' ') && !event.target.closest('a,button,input,select,textarea')){event.preventDefault();window.location.href=this.dataset.orderUrl}">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="flex-grow-1"><div class="small text-secondary">{{ o.order_id }} · {{ o.created_at|date:"d M Y" }}</div><h4 class="mt-1 mb-1">{{ o.title }}</h4>
           {% if o.project %}<div class="small text-secondary">Catalogue project: {{ o.project.name }}</div>{% endif %}
-          <div class="d-flex flex-wrap gap-2 mt-2"><span class="status-chip">{{ o.get_status_display }}</span><span class="status-chip">Stage: {{ o.get_stage_display }}</span><span class="status-chip">₹{{ o.amount }}</span></div>
-        </div><a class="btn btn-red dashboard-order-details" href="{% url 'orders:detail' o.order_id %}">Order details <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div><a class="btn btn-red dashboard-order-details" href="{% url 'orders:detail' o.order_id %}">Order details</a>
       </div>
-      {% if o.request %}<div class="record-subpanel mt-3"><b>Requested project details</b><div class="row g-2 mt-1"><div class="col-md-6"><small>Request type</small><div>{{ o.request.get_request_type_display }}</div></div><div class="col-md-6"><small>Category</small><div>{{ o.request.category|default:"Not specified" }}</div></div><div class="col-md-6"><small>Budget</small><div>{% if o.request.budget %}₹{{ o.request.budget }}{% else %}Not specified{% endif %}</div></div><div class="col-md-6"><small>Deadline</small><div>{{ o.request.deadline|default:"Not specified" }}</div></div><div class="col-12"><small>Required features</small><div>{{ o.request.required_features|default:o.request.customization_features|linebreaksbr }}</div></div>{% if o.request.academic_team_type == 'group' %}<div class="col-12"><small>Group members ({{ o.request.group_size }})</small><div>{{ o.request.group_member_names|linebreaksbr }}</div></div>{% endif %}</div></div>{% endif %}
-      {% include 'orders/_tracker.html' with order=o %}
     </article>
   {% empty %}<div class="tile">You have not placed any orders yet.</div>{% endfor %}
   </div>
   <div class="dashboard-section mt-5" id="payment-records"><h3>Payment Records</h3>
-    {% for payment in payments %}<div class="tile dashboard-record mb-2"><div class="d-flex justify-content-between align-items-start flex-wrap gap-3"><div class="flex-grow-1 min-w-0"><b>{{ payment.order.title }}</b><div class="small text-secondary">{{ payment.order.order_id }} · {{ payment.created_at|date:"d M Y, h:i A" }}</div><div class="mt-1">Amount: ₹{{ payment.amount }} · Method: UPI</div>{% if payment.transaction_id %}<div class="small">UTR: {{ payment.transaction_id }}</div>{% endif %}{% if payment.receipt %}<a class="small" href="{{ payment.receipt.url }}" target="_blank" rel="noopener">View submitted screenshot</a>{% endif %}</div><span class="payment-status payment-status-{{ payment.status }} align-self-start flex-shrink-0">{% if payment.status == 'verified' %}<span class="payment-status-icon" aria-hidden="true">✓</span><span>Verified</span>{% elif payment.status == 'submitted' %}<span>Under review</span>{% elif payment.status == 'failed' %}<span>Failed</span>{% else %}<span>{{ payment.get_status_display }}</span>{% endif %}</span></div><a class="btn btn-red dashboard-order-details mt-2" href="{% url 'orders:detail' payment.order.order_id %}">Open related order <i class="fa-solid fa-arrow-right ms-1"></i></a></div>
+    {% for payment in payments %}<div class="tile dashboard-record mb-2"><div class="d-flex justify-content-between align-items-start flex-wrap gap-3"><div class="flex-grow-1 min-w-0"><b>{{ payment.order.title }}</b><div class="small text-secondary">{{ payment.order.order_id }} · {{ payment.created_at|date:"d M Y, h:i A" }}</div><div class="mt-1">Amount: ₹{{ payment.amount }} · Method: UPI</div>{% if payment.transaction_id %}<div class="small">UTR: {{ payment.transaction_id }}</div>{% endif %}{% if payment.receipt %}<a class="small" href="{{ payment.receipt.url }}" target="_blank" rel="noopener">View submitted screenshot</a>{% endif %}</div><span class="payment-status payment-status-{{ payment.status }} align-self-start flex-shrink-0">{% if payment.status == 'verified' %}<span class="payment-status-icon" aria-hidden="true">✓</span><span>Verified</span>{% elif payment.status == 'submitted' %}<span>Under review</span>{% elif payment.status == 'failed' %}<span>Failed</span>{% else %}<span>{{ payment.get_status_display }}</span>{% endif %}</span></div><a class="btn btn-red dashboard-order-details dashboard-related-order-btn mt-2" href="{% url 'orders:detail' payment.order.order_id %}">Open related order</a></div>
     {% empty %}<div class="tile">No payment records yet.</div>{% endfor %}
   </div>
   <div class="dashboard-section mt-5"><h3>Notifications</h3>{% for n in notifications %}<div class="tile mb-2">{{ n.title }} — {{ n.message }}</div>{% empty %}<div class="tile">No new notifications.</div>{% endfor %}</div>
 </div></section>
 <style>
+.order-card-clickable{cursor:pointer;transition:border-color .18s ease,transform .18s ease}.order-card-clickable:hover{border-color:#ed1c24;transform:translateY(-2px)}.dashboard-order-details{min-width:150px;text-align:center;justify-content:center}
 .customer-dashboard .tile{border:1px solid #343434;border-radius:16px;padding:20px;background:#151515;color:#f6f6f6}
 .dashboard-section{margin-top:28px}.dashboard-record{padding:18px}.record-subpanel{background:#101010;border:1px solid #303030;border-radius:12px;padding:15px}.record-subpanel small{color:#999}.status-chip{display:inline-block;border:1px solid #b3262d;color:#ff777d;border-radius:30px;padding:4px 10px;font-size:12px}.dashboard-record .project-tracker{margin-top:20px}
 @media(max-width:576px){.customer-dashboard .tile{padding:14px}.dashboard-record{padding:14px}.dashboard-record h4{font-size:17px}}
@@ -39,7 +37,6 @@
 .payment-status-submitted{color:#ffd77a;background:#3a2c0b;border-color:#9a741b}
 .payment-status-pending{color:#ddd;background:#292929;border-color:#666}
 .payment-status-failed{color:#ff9999;background:#3b1717;border-color:#9c3434}
-.certificate-preview-trigger{width:min(100%,290px);cursor:zoom-in}.certificate-preview-image{display:block;width:100%;height:auto;border:1px solid #c49a32;box-shadow:0 8px 28px #0008}.certificate-preview-image-large{width:auto;max-width:100%;max-height:78vh;margin:auto;object-fit:contain}
 .certificate-mini,.certificate-large{position:relative;overflow:hidden;text-align:center;color:#181818;background:#faf9f5;border:5px double #c49a32;box-shadow:0 8px 28px #0008}
 .certificate-mini{aspect-ratio:1/1.414;padding:13px 10px;border-width:3px}
 .certificate-mini:before,.certificate-large:before{content:"";position:absolute;inset:8px;border:1px solid #b82029;pointer-events:none}
@@ -67,3 +64,13 @@
 
 </style>
 {% endblock %}
+
+<style>
+/* Keep dashboard actions visually consistent with the main Explore Projects CTA. */
+.customer-dashboard .dashboard-action-btn,.customer-dashboard .dashboard-order-details{display:flex!important;width:100%!important;min-width:0!important;min-height:48px!important;height:48px!important;align-items:center!important;justify-content:center!important;padding:12px 18px!important;border-radius:6px!important;font-size:15px!important;font-weight:700!important;line-height:1.2!important;text-align:center!important;white-space:normal!important;box-sizing:border-box!important;margin-left:0!important;margin-right:0!important}
+.customer-dashboard .dashboard-review-btn{background:#ed1c24!important;border-color:#ed1c24!important;color:#fff!important}
+.customer-dashboard .dashboard-related-order-btn{gap:0!important}
+.customer-dashboard .certificate-preview-trigger{width:100%;max-width:100%;flex-basis:100%}
+.customer-dashboard .certificate-preview-trigger img{width:100%;max-width:100%;height:auto;object-fit:contain}
+@media(min-width:768px){.customer-dashboard #certificates .dashboard-record>.d-flex{flex-direction:column!important;align-items:stretch!important}.customer-dashboard #certificates .dashboard-record>.d-flex>div:last-child{width:100%}}
+</style>

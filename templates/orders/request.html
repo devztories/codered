@@ -5,7 +5,7 @@
   <div class="request-heading"><div class="section-label">LET'S BUILD SOMETHING GREAT</div><h1>Start your <span>project.</span></h1><p>Choose Business or Academic, share your project name, features, budget and deadline. Our team will review your request.</p>
     <div class="request-steps"><span><b>01</b> Choose project type</span><span><b>02</b> Share requirements</span><span><b>03</b> Get our response</span></div>
   </div>
-  <form method="post" enctype="multipart/form-data" class="project-request-form" novalidate>{% csrf_token %}
+  <form method="post" enctype="multipart/form-data" class="project-request-form skip-back-after-submit" novalidate>{% csrf_token %}
     {% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}
     <div class="request-type-cards">
       <a href="?type=business" class="request-type-card {% if request_type == 'business' %}active{% endif %}"><i class="fa-solid fa-briefcase"></i><b>Business Project</b><small>Website, software, automation or business solution</small></a>
@@ -26,7 +26,7 @@
     <div class="request-form-section"><div class="request-section-title"><span>03</span><div><h2>Budget & deadline</h2><p>Share your planned budget and target delivery date.</p></div></div><div class="request-grid">
       {% for field in form %}{% if field.name == 'budget' or field.name == 'deadline' or field.name == 'reference_file' %}<div class="request-field {% if field.name == 'reference_file' %}field-full{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endif %}{% endfor %}
     </div></div>
-    <div class="request-submit-row"><p><i class="fa-solid fa-lock"></i> Your project details are submitted privately.</p><button type="submit" class="btn btn-red btn-lg">Submit request <i class="fa-solid fa-arrow-right ms-2"></i></button></div>
+    <div class="request-submit-row"><p><i class="fa-solid fa-lock"></i> Your project details are submitted privately.</p><button type="submit" class="btn btn-red btn-lg">Submit request</button></div>
   </form>
 </div></section>
 <script>

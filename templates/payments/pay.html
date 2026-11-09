@@ -16,13 +16,13 @@
       {% if upi_id %}<p><strong>UPI ID:</strong> <span>{{ upi_id }}</span></p>{% endif %}
       {% if upi_name %}<p><strong>Payee:</strong> {{ upi_name }}</p>{% endif %}
       {% if payment_ready %}
-      <form method="post" enctype="multipart/form-data" class="mt-4">
+      <form method="post" enctype="multipart/form-data" class="mt-4 skip-back-after-submit">
         {% csrf_token %}
-        <div class="alert alert-info">Submit either one: payment screenshot OR UTR / transaction number. You do not need both.</div>
-        <label for="transaction_id" class="form-label">UPI UTR / transaction number <span class="text-secondary">(optional)</span></label>
-        <input id="transaction_id" class="form-control mb-3" name="transaction_id" maxlength="120" autocomplete="off" placeholder="Enter UTR if available">
-        <label for="receipt" class="form-label">Payment screenshot <span class="text-secondary">(optional · JPG, PNG or WEBP · max 5 MB)</span></label>
-        <input id="receipt" class="form-control mb-3" type="file" name="receipt" accept="image/jpeg,image/png,image/webp">
+        <div class="alert alert-info">Upload the payment screenshot and enter the UPI transaction ID, then submit.</div>
+        <label for="transaction_id" class="form-label">UPI transaction ID / UTR <span class="text-secondary">(required)</span></label>
+        <input id="transaction_id" class="form-control mb-3" name="transaction_id" maxlength="120" autocomplete="off" placeholder="Enter UPI transaction ID" required>
+        <label for="receipt" class="form-label">Payment screenshot <span class="text-secondary">(required · JPG, PNG or WEBP · max 5 MB)</span></label>
+        <input id="receipt" class="form-control mb-3" type="file" name="receipt" accept="image/jpeg,image/png,image/webp" required>
         <button class="btn btn-red w-100 payment-action-btn" type="submit">Submit payment proof</button>
       </form>
       {% else %}

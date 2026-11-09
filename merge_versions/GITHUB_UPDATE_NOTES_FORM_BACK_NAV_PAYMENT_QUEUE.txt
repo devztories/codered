@@ -1,0 +1,47 @@
+﻿
+CODERED INVENTIONS - FORM NAVIGATION AND PAYMENT QUEUE UPDATE
+
+Changes:
+
+1. Added NoStoreHtmlMiddleware in core_middleware.py.
+   HTML responses now send private/no-store/no-cache headers to reduce
+   stale pages being restored from browser cache.
+
+2. Registered the middleware in config/settings.py.
+
+3. Updated accounts.profile to use POST -> Redirect -> GET
+   after successful profile updates.
+
+4. Customer submission views use redirects after successful POST:
+   - accounts.register and accounts.login_view
+   - contact.submit
+   - orders.request_project
+   - orders.request_certificate
+   - reviews.create
+   - payments.pay
+
+5. Payment proof submission redirects to Order Detail.
+
+6. Existing submitted or verified payments cannot reopen the QR payment form.
+
+7. Order detail uses payment_submitted to show the payment queue state.
+
+8. Existing admin create/update/delete and employee progress
+   actions redirect after successful POST operations.
+
+Expected Behaviour:
+
+- After successful form submission, users are redirected to
+  the appropriate result or detail page.
+- Refreshing the result page does not resubmit the POST request.
+- Browser Back should not restore a cached submitted HTML form.
+- Payment proof submission redirects to Order Detail.
+- Invalid form submissions display validation errors so users
+  can correct their input.
+
+Important:
+
+- Global cache headers alone do not prevent duplicate submissions.
+- Invalid form submissions intentionally render the form.
+- Static and media assets are unaffected.
+- No database schema changes or migrations are required.

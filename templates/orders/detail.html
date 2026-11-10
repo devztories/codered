@@ -190,6 +190,7 @@
         const modalElement = document.getElementById('paymentRequiredModal');
 
         if (modalElement && window.bootstrap) {
+          document.body.appendChild(modalElement);
           bootstrap.Modal.getOrCreateInstance(modalElement).show();
         }
       });
@@ -240,6 +241,7 @@
         const modalElement = document.getElementById('paymentReviewModal');
 
         if (modalElement && window.bootstrap) {
+          document.body.appendChild(modalElement);
           bootstrap.Modal.getOrCreateInstance(modalElement).show();
         }
       });

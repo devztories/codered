@@ -15,9 +15,9 @@ from .models import Payment, PaymentSettings
 
 MAX_RECEIPT_SIZE = 5 * 1024 * 1024
 
-# Customer must give BOTH the payment screenshot and the transaction ID.
-# Set to False to accept either one.
-REQUIRE_BOTH_PROOFS = True
+# Customer can give EITHER the payment screenshot OR the UTR / transaction ID.
+# Set to True to require both.
+REQUIRE_BOTH_PROOFS = False
 
 ALLOWED_RECEIPT_TYPES = {
     "image/jpeg",
@@ -140,7 +140,7 @@ def pay(request, order_id):
                         amount=locked_order.amount,
                         method="upi",
                         status="submitted",
-                        receipt=receipt,
+                        receipt=receipt or "",
                         transaction_id=transaction_id,
                     )
 

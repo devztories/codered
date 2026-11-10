@@ -16,15 +16,29 @@
       {% if upi_id %}<p><strong>UPI ID:</strong> <span>{{ upi_id }}</span></p>{% endif %}
       {% if upi_name %}<p><strong>Payee:</strong> {{ upi_name }}</p>{% endif %}
       {% if payment_ready %}
-      <form method="post" enctype="multipart/form-data" class="mt-4 skip-back-after-submit">
+      <form method="post" enctype="multipart/form-data" class="mt-4 skip-back-after-submit" id="paymentProofForm">
         {% csrf_token %}
-        <div class="alert alert-info">Upload the payment screenshot and enter the UPI transaction ID, then submit.</div>
-        <label for="transaction_id" class="form-label">UPI transaction ID / UTR <span class="text-secondary">(required)</span></label>
-        <input id="transaction_id" class="form-control mb-3" name="transaction_id" maxlength="120" autocomplete="off" placeholder="Enter UPI transaction ID" required>
-        <label for="receipt" class="form-label">Payment screenshot <span class="text-secondary">(required · JPG, PNG or WEBP · max 5 MB)</span></label>
-        <input id="receipt" class="form-control mb-3" type="file" name="receipt" accept="image/jpeg,image/png,image/webp" required>
+        <div class="alert alert-info">Upload the payment screenshot or enter the UPI transaction ID (UTR), then submit. Either one is enough.</div>
+        <label for="transaction_id" class="form-label">UPI transaction ID / UTR <span class="text-secondary">(optional if you upload a screenshot)</span></label>
+        <input id="transaction_id" class="form-control mb-3" name="transaction_id" maxlength="120" autocomplete="off" placeholder="Enter UPI transaction ID">
+        <label for="receipt" class="form-label">Payment screenshot <span class="text-secondary">(optional if you enter the UTR · JPG, PNG or WEBP · max 5 MB)</span></label>
+        <input id="receipt" class="form-control mb-3" type="file" name="receipt" accept="image/jpeg,image/png,image/webp">
         <button class="btn btn-red w-100 payment-action-btn" type="submit">Submit payment proof</button>
       </form>
+      <script>
+        (function () {
+          var form = document.getElementById('paymentProofForm');
+          if (!form) return;
+          form.addEventListener('submit', function (e) {
+            var utr = form.querySelector('[name="transaction_id"]').value.trim();
+            var file = form.querySelector('[name="receipt"]').files.length;
+            if (!utr && !file) {
+              e.preventDefault();
+              alert('Please upload the payment screenshot or enter the UPI transaction ID (UTR).');
+            }
+          });
+        })();
+      </script>
       {% else %}
         <p class="alert alert-warning">UPI payment details have not been configured. Please contact the administrator.</p>
       {% endif %}

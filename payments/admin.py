@@ -9,7 +9,7 @@ def verify_payments(modeladmin, request, queryset):
     verified = 0
     skipped = 0
     for payment in queryset.select_related("order"):
-        if payment.status != "submitted" or not payment.receipt or not payment.transaction_id:
+        if payment.status != "submitted" or not (payment.receipt or payment.transaction_id):
             skipped += 1
             continue
         payment.status = "verified"
@@ -20,7 +20,7 @@ def verify_payments(modeladmin, request, queryset):
     if verified:
         modeladmin.message_user(request, f"{verified} payment(s) verified.", messages.SUCCESS)
     if skipped:
-        modeladmin.message_user(request, f"{skipped} payment(s) skipped: proof or transaction ID missing, or not submitted.", messages.WARNING)
+        modeladmin.message_user(request, f"{skipped} payment(s) skipped: no screenshot or transaction ID, or not submitted.", messages.WARNING)
 
 
 @admin.register(Payment)

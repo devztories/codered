@@ -74,11 +74,35 @@ class CustomerFlowTests(TestCase):
         self.assertIn("no-store", resp["Cache-Control"])
 
     # ---- payment flow -------------------------------------------------
-    def test_payment_requires_screenshot_and_transaction_id(self):
+    def test_payment_needs_screenshot_or_transaction_id(self):
+        url = reverse("payments:pay", args=[self.order.order_id])
+        self.client.post(url, {})
+        self.assertEqual(Payment.objects.count(), 0)
+
+    def test_payment_with_only_utr_is_submitted(self):
         url = reverse("payments:pay", args=[self.order.order_id])
         self.client.post(url, {"transaction_id": "UTR123"})
+        pay = Payment.objects.get()
+        self.assertEqual((pay.status, pay.transaction_id, bool(pay.receipt)), ("submitted", "UTR123", False))
+
+    def test_payment_with_only_screenshot_is_submitted(self):
+        url = reverse("payments:pay", args=[self.order.order_id])
         self.client.post(url, {"receipt": png_file()})
-        self.assertEqual(Payment.objects.count(), 0)
+        pay = Payment.objects.get()
+        self.assertEqual((pay.status, pay.transaction_id, bool(pay.receipt)), ("submitted", "", True))
+
+    def test_deleting_order_removes_notifications_and_request(self):
+        from notifications.models import Notification
+        pr = ProjectRequest.objects.create(user=self.user, title="Req", required_features="x")
+        order = Order.objects.create(user=self.user, request=pr, title="Req", amount=0, status="under_review")
+        oid = order.order_id
+        self.assertTrue(Notification.objects.filter(url=f"/orders/{oid}/").exists())
+        other = Order.objects.create(user=self.user, title="Other", amount=0)
+        order.delete()
+        self.assertFalse(Notification.objects.filter(url=f"/orders/{oid}/").exists())
+        self.assertFalse(Notification.objects.filter(message__contains=oid).exists())
+        self.assertFalse(ProjectRequest.objects.filter(pk=pr.pk).exists())
+        self.assertTrue(Notification.objects.filter(url=f"/orders/{other.order_id}/").exists())
 
     def test_payment_submit_redirects_and_queue_status(self):
         url = reverse("payments:pay", args=[self.order.order_id])

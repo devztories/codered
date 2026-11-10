@@ -1,3 +1,4 @@
+{% load static %}
 {% extends 'base.html' %}
 {% block title %}Projects | CODERED INVENTIONS{% endblock %}
 {% block content %}
@@ -6,6 +7,7 @@
   <h1>Explore <span>projects.</span></h1>
   <p>Browse business solutions and academic projects. Academic projects can be purchased directly or customized with additional features.</p>
 
+  <div id="projectChoice">
   {% if project_type == 'academic' %}
     <div class="academic-choice-row"><div><b>Ready-made academic projects</b><span>Buy directly, or request extra features.</span></div><a class="btn btn-red" href="{% url 'orders:request' %}?type=academic_custom">Build your own project</a></div>
   {% elif project_type == 'business' %}
@@ -13,8 +15,9 @@
   {% else %}
     <div class="academic-choice-row"><div><b>Academic project?</b><span>Choose a ready-made project or build one from scratch.</span></div><a class="btn btn-red" href="?type=academic">Explore academic projects</a></div>
   {% endif %}
+  </div>
 
-  <form class="project-filter my-4" method="get">
+  <form class="project-filter my-4" id="projectFilterForm" method="get" action="{% url 'catalog:projects' %}">
     <div class="project-filter-type">
       <label for="projectTypeSelect">Project type</label>
       <select id="projectTypeSelect" class="form-select" name="type">
@@ -39,197 +42,9 @@
     <button class="btn btn-red project-filter-submit" type="submit">Apply</button>
   </form>
 
-  <div id="projectResults">
-  {% if page_obj.object_list %}
-    <div class="project-catalogue" id="projectCatalogue">
-      <div class="project-catalogue-topline">
-        <span>{{ project_count }} projects · 10 cards per row</span>
-        <span>Swipe left or right to browse projects</span>
-      </div>
-      {% for row in rows %}
-      <div class="project-row-wrap">
-        <div class="project-catalogue-grid" data-project-row tabindex="0" aria-label="Swipe horizontally to browse projects, row {{ forloop.counter }}">
-        {% for p in row %}
-          <a class="project-card" href="{% url 'catalog:detail' p.slug %}" draggable="false">
-            {% if p.cover_image %}<img src="{{ p.cover_image.url }}" alt="{{ p.name }}" loading="lazy" draggable="false">{% else %}<div class="project-placeholder"><i class="fa-solid fa-laptop-code"></i></div>{% endif %}
-            <div class="project-card-content">
-              <span class="project-category-label">{{ p.category.name }}</span>
-              <h5>{{ p.name }}</h5>
-              <p>{{ p.short_description }}</p>
-              <div class="project-price">₹{{ p.price|floatformat:0 }}</div>
-            </div>
-          </a>
-        {% endfor %}
-        </div>
-      </div>
-      {% endfor %}
-      {% if page_obj.paginator.num_pages > 1 %}
-        <nav class="project-pagination" aria-label="Project pages">
-          {% if page_obj.has_previous %}<a class="btn btn-outline-light" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
-          <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-          {% if page_obj.has_next %}<a class="btn btn-red" href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if project_type %}type={{ project_type }}&{% endif %}{% if selected %}category={{ selected }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
-        </nav>
-      {% endif %}
-    </div>
-  {% else %}<div class="empty-projects"><i class="fa-solid fa-folder-open"></i><h3>No projects found</h3><p>Try another search or category.</p></div>{% endif %}
+  <div id="projectResults" aria-live="polite" aria-busy="false">
+    {% include 'catalog/partials/project_results.html' %}
   </div>
 </div></section>
-<script>
-(function () {
-  // Smooth in-page filtering/pagination (no full reload, no jump to the top).
-  var form = document.querySelector('.project-filter');
-  var results = document.getElementById('projectResults');
-  if (!form || !results || !window.fetch || !window.DOMParser) return;
-
-  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var controller = null, sizeTimer = null;
-
-  function currentUrl() { return location.pathname + location.search; }
-
-  function syncForm(url) {
-    var params = new URL(url, location.href).searchParams;
-    ['type', 'q', 'category'].forEach(function (name) {
-      var field = form.elements[name];
-      if (field) field.value = params.get(name) || '';
-    });
-  }
-
-  function syncNav() {
-    document.querySelectorAll('.navbar .dropdown-item').forEach(function (link) {
-      var u = new URL(link.href, location.origin);
-      link.classList.toggle('active', u.pathname === location.pathname && u.search === location.search);
-    });
-  }
-
-  function finishResize() {
-    results.style.height = '';
-    results.classList.remove('is-resizing');
-  }
-
-  async function load(url, opts) {
-    opts = opts || {};
-    if (controller) controller.abort();
-    controller = new AbortController();
-    clearTimeout(sizeTimer);
-
-    var startHeight = results.offsetHeight;
-    results.style.height = startHeight + 'px';
-    results.classList.add('is-resizing', 'is-loading');
-
-    try {
-      var res = await fetch(url, {
-        credentials: 'same-origin',
-        signal: controller.signal,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      });
-      if (!res.ok) throw new Error('bad status');
-      var doc = new DOMParser().parseFromString(await res.text(), 'text/html');
-      var fresh = doc.getElementById('projectResults');
-      if (!fresh) throw new Error('no results block');
-
-      results.innerHTML = fresh.innerHTML;
-      var choice = document.querySelector('.academic-choice-row');
-      var freshChoice = doc.querySelector('.academic-choice-row');
-      if (choice && freshChoice) choice.innerHTML = freshChoice.innerHTML;
-
-      if (opts.push !== false && url !== currentUrl()) history.pushState({}, '', url);
-      syncForm(url);
-      syncNav();
-
-      var endHeight = results.scrollHeight;
-      results.classList.remove('is-loading');
-      if (reduceMotion || Math.abs(endHeight - startHeight) < 2) {
-        finishResize();
-      } else {
-        void results.offsetHeight;
-        results.style.height = endHeight + 'px';
-        sizeTimer = setTimeout(finishResize, 420);
-      }
-
-      if (opts.scrollToResults) {
-        var top = results.getBoundingClientRect().top + window.pageYOffset - 96;
-        window.scrollTo({ top: Math.max(0, top), behavior: reduceMotion ? 'auto' : 'smooth' });
-      }
-    } catch (err) {
-      if (err && err.name === 'AbortError') return;
-      location.href = url;
-    }
-  }
-
-  function filterUrl() {
-    var params = new URLSearchParams();
-    new FormData(form).forEach(function (value, key) {
-      value = String(value).trim();
-      if (value) params.set(key, value);
-    });
-    var qs = params.toString();
-    return location.pathname + (qs ? '?' + qs : '');
-  }
-
-  form.addEventListener('submit', function (event) {
-    event.preventDefault();
-    load(filterUrl());
-  });
-  ['projectTypeSelect', 'projectCategory'].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener('change', function () { load(filterUrl()); });
-  });
-
-  document.addEventListener('click', function (event) {
-    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    var link = event.target.closest && event.target.closest('a[href]');
-    if (!link || (link.target && link.target !== '_self') || link.hasAttribute('download')) return;
-    var u;
-    try { u = new URL(link.href, location.href); } catch (e) { return; }
-    if (u.origin !== location.origin || u.pathname !== location.pathname) return;
-    event.preventDefault();
-    load(u.pathname + u.search, { scrollToResults: !!link.closest('.project-pagination') });
-  });
-
-  window.addEventListener('popstate', function () {
-    load(currentUrl(), { push: false });
-  });
-
-  // Desktop mouse: drag a row sideways like a touch swipe, then settle on a card.
-  var drag = null, suppressClick = false;
-  document.addEventListener('pointerdown', function (e) {
-    if (e.pointerType !== 'mouse' || e.button !== 0) return;
-    var row = e.target.closest && e.target.closest('[data-project-row]');
-    if (!row || row.scrollWidth <= row.clientWidth + 2) return;
-    drag = { row: row, x: e.clientX, left: row.scrollLeft, moved: false, id: e.pointerId };
-  });
-  document.addEventListener('pointermove', function (e) {
-    if (!drag || e.pointerId !== drag.id) return;
-    var dx = e.clientX - drag.x;
-    if (!drag.moved && Math.abs(dx) > 5) {
-      drag.moved = true;
-      drag.row.classList.add('is-dragging');
-      try { drag.row.setPointerCapture(e.pointerId); } catch (err) {}
-    }
-    if (drag.moved) drag.row.scrollLeft = drag.left - dx;
-  });
-  function endDrag() {
-    if (!drag) return;
-    var d = drag; drag = null;
-    if (!d.moved) return;
-    d.row.classList.remove('is-dragging');
-    var card = d.row.querySelector('.project-card');
-    if (card) {
-      var gap = parseFloat(getComputedStyle(d.row).columnGap) || 16;
-      var step = card.offsetWidth + gap;
-      d.row.scrollTo({ left: Math.round(d.row.scrollLeft / step) * step, behavior: 'smooth' });
-    }
-    suppressClick = true;
-    setTimeout(function () { suppressClick = false; }, 0);
-  }
-  document.addEventListener('pointerup', endDrag);
-  document.addEventListener('pointercancel', endDrag);
-  document.addEventListener('click', function (e) {
-    if (suppressClick) { e.preventDefault(); e.stopPropagation(); }
-  }, true);
-  document.addEventListener('dragstart', function (e) {
-    if (e.target.closest && e.target.closest('[data-project-row]')) e.preventDefault();
-  });
-})();
-</script>
+<script src="{% static 'js/project-catalogue.js' %}" defer></script>
 {% endblock %}

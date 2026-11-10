@@ -953,3 +953,28 @@ main { animation:coderedPageEnter .24s ease-out both; }
   cursor: pointer;
 }
 .project-request-form input[type="date"] { color-scheme: dark; }
+
+/* Projects page: 10 rows per page, each row a swipeable strip of 10 cards.
+   Desktop shows 3 cards per row at once; phones keep one card per view. */
+.project-catalogue .project-row-wrap + .project-row-wrap { margin-top: 4px; }
+#projectResults { transition: opacity .22s ease, height .38s ease; }
+#projectResults.is-resizing { overflow: hidden; }
+#projectResults.is-loading { opacity: .35; pointer-events: none; }
+.project-catalogue-grid[data-project-row].is-dragging { scroll-snap-type: none; scroll-behavior: auto; cursor: grabbing; }
+@media (min-width: 992px) {
+  .project-catalogue-grid[data-project-row] { gap: 16px; cursor: grab; -webkit-user-select: none; user-select: none; }
+  .project-catalogue-grid[data-project-row] > .project-card {
+    flex: 0 0 calc((100% - 32px) / 3);
+    width: calc((100% - 32px) / 3);
+    height: 410px; min-height: 410px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 200px minmax(0, 1fr);
+  }
+  .project-catalogue-grid[data-project-row] > .project-card > img,
+  .project-catalogue-grid[data-project-row] > .project-card > .project-placeholder { height: 200px; min-height: 200px; }
+  .project-catalogue-grid[data-project-row] > .project-card > .project-card-content { padding: 18px 22px 20px; justify-content: flex-start; }
+  .project-catalogue-grid[data-project-row] .project-card h5 { margin: 12px 0 8px; font-size: 1.3rem; }
+  .project-catalogue-grid[data-project-row] .project-card p { font-size: .92rem; line-height: 1.6; }
+  .project-catalogue-grid[data-project-row] .project-price { padding-top: 14px; font-size: 1.3rem; }
+}
+@media (prefers-reduced-motion: reduce) { #projectResults { transition: none; } }

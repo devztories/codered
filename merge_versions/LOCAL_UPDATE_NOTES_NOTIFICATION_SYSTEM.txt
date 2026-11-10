@@ -1,0 +1,32 @@
+﻿CODERED INVENTIONS - CUSTOMER AND ADMIN NOTIFICATION SYSTEM
+
+Implemented:
+- Persistent per-user notifications using the existing Notification model/table.
+- Notification bell and unread badge in the public customer navbar.
+- Notification bell and unread badge in the admin/employee workspace.
+- Near-real-time feed polling every 8 seconds.
+- Notification history list (latest 15), mark-one-read and mark-all-read actions.
+- Authenticated notification APIs scoped to the signed-in account.
+- Customer alerts for new requests/orders, order status changes, certificate status,
+  payment proof receipt/payment status, customer-visible work progress and admin
+  order messages.
+- Admin alerts for new customer registrations, new project/order requests,
+  submitted payment proofs, website enquiries, reviews and customer chatbot messages.
+- WhatsApp Cloud API integration for admin and customer alerts.
+- Customer WhatsApp delivery requires profile opt-in and the global enable switch.
+- Admin WhatsApp destinations can be configured with environment variables.
+- Added UserProfile.whatsapp_notifications_enabled and migration 0003.
+
+Setup:
+1. Run python manage.py migrate.
+2. Configure WhatsApp Cloud API values from .env.example in the hosting environment.
+3. Create/approve the WhatsApp template described in NOTIFICATIONS_SETUP.md.
+4. Add admin WhatsApp destination numbers.
+5. Customer enables WhatsApp updates in /accounts/profile/.
+6. Set WHATSAPP_CUSTOMER_NOTIFICATIONS_ENABLED=true only after collecting customer consent.
+
+Technical:
+- No new third-party Python dependency.
+- Website updates use 8-second HTTP polling, not WebSockets/Redis.
+- WhatsApp failures do not remove or block saved website notifications.
+- See NOTIFICATIONS_SETUP.md for complete setup and Meta template details.

@@ -1,50 +1,199 @@
-{% load static %}
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Projects | CODERED INVENTIONS{% endblock %}
+
 {% block content %}
-<section class="page-hero"><div class="container">
-  <div class="section-label">OUR PROJECT STORE</div>
-  <h1>Explore <span>projects.</span></h1>
-  <p>Browse business solutions and academic projects. Academic projects can be purchased directly or customized with additional features.</p>
+<section class="page-hero">
+  <div class="container">
 
-  <div id="projectChoice">
-  {% if project_type == 'academic' %}
-    <div class="academic-choice-row"><div><b>Ready-made academic projects</b><span>Buy directly, or request extra features.</span></div><a class="btn btn-red" href="{% url 'orders:request' %}?type=academic_custom">Build your own project</a></div>
-  {% elif project_type == 'business' %}
-    <div class="academic-choice-row"><div><b>Need a custom business solution?</b><span>Share your idea, deadline and budget.</span></div><a class="btn btn-red" href="{% url 'orders:request' %}?type=business">Start a business project</a></div>
-  {% else %}
-    <div class="academic-choice-row"><div><b>Academic project?</b><span>Choose a ready-made project or build one from scratch.</span></div><a class="btn btn-red" href="?type=academic">Explore academic projects</a></div>
-  {% endif %}
+    <div class="section-label">OUR PROJECT STORE</div>
+
+    <h1>Explore <span>projects.</span></h1>
+
+    <p>
+      Browse business solutions and academic projects.
+      Academic projects can be purchased directly or customized
+      with additional features.
+    </p>
+
+    <!-- Project Choice -->
+    <div id="projectChoice">
+
+      {% if project_type == 'academic' %}
+
+        <div class="academic-choice-row">
+          <div>
+            <b>Ready-made academic projects</b>
+            <span>Buy directly, or request extra features.</span>
+          </div>
+
+          <a
+            class="btn btn-red"
+            href="{% url 'orders:request' %}?type=academic_custom">
+            Build your own project
+          </a>
+        </div>
+
+      {% elif project_type == 'business' %}
+
+        <div class="academic-choice-row">
+          <div>
+            <b>Need a custom business solution?</b>
+            <span>Share your idea, deadline and budget.</span>
+          </div>
+
+          <a
+            class="btn btn-red"
+            href="{% url 'orders:request' %}?type=business">
+            Start a business project
+          </a>
+        </div>
+
+      {% else %}
+
+        <div class="academic-choice-row">
+          <div>
+            <b>Academic project?</b>
+            <span>
+              Choose a ready-made project or build one from scratch.
+            </span>
+          </div>
+
+          <a class="btn btn-red" href="?type=academic">
+            Explore academic projects
+          </a>
+        </div>
+
+      {% endif %}
+
+    </div>
+
+
+    <!-- Project Filters -->
+    <form
+      class="project-filter my-4"
+      id="projectFilterForm"
+      method="get"
+      action="{% url 'catalog:projects' %}">
+
+      <!-- Project Type -->
+      <div class="project-filter-type">
+
+        <label for="projectTypeSelect">
+          Project type
+        </label>
+
+        <select
+          id="projectTypeSelect"
+          class="form-select"
+          name="type">
+
+          <option
+            value=""
+            {% if not project_type %}selected{% endif %}>
+            All projects
+          </option>
+
+          <option
+            value="business"
+            {% if project_type == 'business' %}selected{% endif %}>
+            Business projects
+          </option>
+
+          <option
+            value="academic"
+            {% if project_type == 'academic' %}selected{% endif %}>
+            Academic projects
+          </option>
+
+        </select>
+      </div>
+
+
+      <!-- Search -->
+      <div class="project-filter-search">
+
+        <label for="projectSearch">
+          Search
+        </label>
+
+        <input
+          id="projectSearch"
+          class="form-control"
+          type="search"
+          name="q"
+          value="{{ q }}"
+          placeholder="Search projects or technologies">
+
+      </div>
+
+
+      <!-- Category -->
+      <div class="project-filter-category">
+
+        <label for="projectCategory">
+          Category
+        </label>
+
+        <select
+          id="projectCategory"
+          class="form-select"
+          name="category">
+
+          <option value="">
+            All categories
+          </option>
+
+          {% for c in categories %}
+
+            <option
+              value="{{ c.slug }}"
+              {% if selected == c.slug %}selected{% endif %}>
+
+              {{ c.name }}
+
+            </option>
+
+          {% endfor %}
+
+        </select>
+
+      </div>
+
+
+      <!-- Submit -->
+      <button
+        class="btn btn-red project-filter-submit"
+        type="submit">
+
+        Apply
+
+      </button>
+
+    </form>
+
+
+    <!-- AJAX Project Results -->
+    <!-- IMPORTANT: Only ONE projectResults block -->
+
+    <div
+      id="projectResults"
+      aria-live="polite"
+      aria-busy="false">
+
+      {% include 'catalog/partials/project_results.html' %}
+
+    </div>
+
   </div>
+</section>
 
-  <form class="project-filter my-4" id="projectFilterForm" method="get" action="{% url 'catalog:projects' %}">
-    <div class="project-filter-type">
-      <label for="projectTypeSelect">Project type</label>
-      <select id="projectTypeSelect" class="form-select" name="type">
-        <option value="" {% if not project_type %}selected{% endif %}>All projects</option>
-        <option value="business" {% if project_type == 'business' %}selected{% endif %}>Business projects</option>
-        <option value="academic" {% if project_type == 'academic' %}selected{% endif %}>Academic projects</option>
-      </select>
-    </div>
-    <div class="project-filter-search">
-      <label for="projectSearch">Search</label>
-      <input id="projectSearch" class="form-control" name="q" value="{{ q }}" placeholder="Search projects or technologies">
-    </div>
-    <div class="project-filter-category">
-      <label for="projectCategory">Category</label>
-      <select id="projectCategory" class="form-select" name="category">
-        <option value="">All categories</option>
-        {% for c in categories %}
-          <option value="{{ c.slug }}" {% if selected == c.slug %}selected{% endif %}>{{ c.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <button class="btn btn-red project-filter-submit" type="submit">Apply</button>
-  </form>
 
-  <div id="projectResults" aria-live="polite" aria-busy="false">
-    {% include 'catalog/partials/project_results.html' %}
-  </div>
-</div></section>
-<script src="{% static 'js/project-catalogue.js' %}" defer></script>
+<!-- Project Catalogue JavaScript -->
+<script
+  src="{% static 'js/project-catalogue.js' %}"
+  defer>
+</script>
+
 {% endblock %}

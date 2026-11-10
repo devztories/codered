@@ -120,7 +120,7 @@ def create_notification(user, title, message, url="", send_whatsapp_message=True
     )
     transaction.on_commit(
         lambda: __import__("notifications.push", fromlist=["send_web_push"]).send_web_push(
-            user, notification.title, notification.message, notification.url
+            user, notification.title, notification.message, notification.url, notification.pk
         )
     )
     # Send externally only after the DB transaction has committed.

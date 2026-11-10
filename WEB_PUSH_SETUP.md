@@ -24,7 +24,7 @@ Use a VAPID key generator compatible with `pywebpush` if your installed version 
 1. Add the three VAPID variables in Vercel Project → Settings → Environment Variables.
 2. Redeploy.
 3. Run `python manage.py migrate` against the production database.
-4. Sign in to CodeRed on Android Chrome, open the site, and tap **Enable push**. Allow notifications.
+4. Sign in to CodeRed (customer or admin/employee dashboard). A notification pop-up appears automatically; tap **Allow notifications** and accept the browser prompt. No manual button is needed. If you choose **Not now**, the pop-up returns after 3 days.
 5. For the best Android experience, use Chrome menu → Install app / Add to Home screen.
 
 The browser must support Push API and notifications. On iPhone, web push generally requires iOS/iPadOS 16.4+ and the site to be added to the Home Screen. Push delivery depends on browser/OS connectivity and permission.

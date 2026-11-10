@@ -53,3 +53,7 @@ def server_error(request):
 
 def service_unavailable(request):
     return render(request, "errors/503.html", status=503)
+
+
+def csrf_failure(request, reason=""):
+    return render(request, "errors/csrf.html", status=403)

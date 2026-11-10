@@ -75,18 +75,54 @@ def unsubscribe_push(request):
         PushSubscription.objects.filter(user=request.user, endpoint=endpoint).delete()
     return JsonResponse({"ok": True})
 
+SERVICE_WORKER_JS = """\
+self.addEventListener('install', function () { self.skipWaiting(); });
+self.addEventListener('activate', function (event) { event.waitUntil(self.clients.claim()); });
+
+self.addEventListener('push', function (event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
+  var title = data.title || 'CODERED INVENTIONS';
+  var options = {
+    body: data.body || 'You have a new update.',
+    icon: '/static/images/icon-192.png',
+    badge: '/static/images/badge-96.png',
+    data: { url: data.url || '/' },
+    timestamp: Date.now(),
+    vibrate: [120, 60, 120]
+  };
+  // A unique tag per notification keeps several updates visible instead of replacing each other.
+  if (data.id) options.tag = 'codered-' + data.id;
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var target = new URL('/', self.location.origin);
+  try {
+    var requested = new URL((event.notification.data && event.notification.data.url) || '/', self.location.origin);
+    if (requested.origin === self.location.origin) target = requested;
+  } catch (e) {}
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (windows) {
+      for (var i = 0; i < windows.length; i++) {
+        var client = windows[i];
+        if (client.url.indexOf(self.location.origin) === 0 && 'focus' in client) {
+          return client.focus().then(function (focused) {
+            if (focused && 'navigate' in focused) return focused.navigate(target.href);
+          });
+        }
+      }
+      return self.clients.openWindow(target.href);
+    })
+  );
+});
+"""
+
+
 def service_worker(request):
     from django.http import HttpResponse
-    from django.templatetags.static import static
-    response = HttpResponse(
-        "self.addEventListener('push', function(event) {\n"
-        " let data = {}; try { data = event.data ? event.data.json() : {}; } catch(e) {}\n"
-        " const title = data.title || 'CodeRed Inventions';\n"
-        " const options = { body: data.body || 'You have a new update.', icon: '/static/images/icon-192.png', badge: '/static/images/icon-192.png', data: { url: data.url || '/' }, vibrate: [100, 50, 100], tag: 'codered-update' };\n"
-        " event.waitUntil(self.registration.showNotification(title, options));\n"
-        "});\n"
-        "self.addEventListener('notificationclick', function(event) { event.notification.close(); event.waitUntil(clients.openWindow(event.notification.data.url || '/')); });\n",
-        content_type="application/javascript")
+    response = HttpResponse(SERVICE_WORKER_JS, content_type="application/javascript")
     response["Service-Worker-Allowed"] = "/"
     response["Cache-Control"] = "no-cache"
     return response

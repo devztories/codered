@@ -305,6 +305,9 @@ SESSION_COOKIE_HTTPONLY = True
 
 CSRF_COOKIE_HTTPONLY = True
 
+# Branded page shown when a CSRF check fails.
+CSRF_FAILURE_VIEW = "core_views.csrf_failure"
+
 CSRF_TRUSTED_ORIGINS = [
     x.strip()
     for x in os.getenv(

@@ -5,6 +5,33 @@
   const csrf = document.querySelector('meta[name="csrf-token"]')?.content || "";
   const feedUrl = "/notifications/feed/";
 
+  function timeAgo(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    const seconds = Math.round((Date.now() - date.getTime()) / 1000);
+    if (isNaN(seconds)) return "";
+    if (seconds < 60) return "Just now";
+    if (seconds < 3600) return Math.floor(seconds / 60) + " min ago";
+    if (seconds < 86400) return Math.floor(seconds / 3600) + " hr ago";
+    if (seconds < 604800) return Math.floor(seconds / 86400) + " day" + (seconds >= 172800 ? "s" : "") + " ago";
+    return date.toLocaleDateString(undefined, {day: "numeric", month: "short", year: "numeric"});
+  }
+
+  function showError(root) {
+    const list = root.querySelector(".notification-items");
+    if (!list) return;
+    list.replaceChildren();
+    const box = document.createElement("div");
+    box.className = "notification-empty";
+    box.textContent = "We couldn\u2019t load your notifications.";
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.textContent = "Try again";
+    retry.addEventListener("click", refresh);
+    box.appendChild(retry);
+    list.appendChild(box);
+  }
+
   function render(root, data) {
     const badge = root.querySelector(".notification-count");
     const list = root.querySelector(".notification-items");
@@ -15,7 +42,7 @@
     }
     if (!list) return;
     if (!data.items || !data.items.length) {
-      list.innerHTML = '<p class="notification-empty">You are all caught up.</p>';
+      list.innerHTML = '<p class="notification-empty">You are all caught up.<br>New updates will appear here.</p>';
       return;
     }
     list.replaceChildren();
@@ -28,7 +55,8 @@
       const message = document.createElement("span");
       message.textContent = String(item.message || "");
       const date = document.createElement("small");
-      date.textContent = item.created_at ? new Date(item.created_at).toLocaleString() : "";
+      date.textContent = timeAgo(item.created_at);
+      date.title = item.created_at ? new Date(item.created_at).toLocaleString() : "";
       button.append(title, message, date);
       button.addEventListener("click", async function () {
         try {
@@ -50,11 +78,15 @@
         credentials: "same-origin",
         headers: {"X-Requested-With": "XMLHttpRequest"}
       });
-      if (!response.ok) return;
+      if (!response.ok) throw new Error("feed-failed");
       const data = await response.json();
       roots.forEach(root => render(root, data));
     } catch (e) {
       // Keep the main website usable if the notification service is unavailable.
+      roots.forEach(function (root) {
+        const panel = root.querySelector(".notification-popover");
+        if (panel && !panel.hidden) showError(root);
+      });
     }
   }
 
